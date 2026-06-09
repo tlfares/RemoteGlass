@@ -23,6 +23,7 @@ Grab the latest .ipa in the Releases section and install it with any sideloading
 
 ## Known issues
 The touch response shape has a higher corner radius of the actual remote buttons, that's an intrinsic Liquid Glass flaw from Apple for every non-circular shapes, Apple fixed that with iOS 27.
-    The latest version includes two solutions for iOS 26 users.
-    - Circular icons option
-    - Disabling the HDR highlight and the button stretching in response to touch
+
+The latest version includes two solutions for iOS 26 users.
+- Circular icons option
+- Disabling the HDR highlight and the button stretching in response to touch
