@@ -39,6 +39,7 @@ final class RemoteViewModel: ObservableObject {
     @Published var status: ConnectionStatus = .idle
     @Published var isScanning = false
     @Published var foundDecoders: [String] = []
+    @Published var shouldAutoRetry = false
     @Published var bgColor1: Color {
         didSet { UserDefaults.standard.set(bgColor1.hex, forKey: Self.bgColor1Key) }
     }
@@ -60,12 +61,24 @@ final class RemoteViewModel: ObservableObject {
     @Published var bgSpread: Double {
         didSet { UserDefaults.standard.set(bgSpread, forKey: Self.bgSpreadKey) }
     }
+    @Published var bgTint: Double {
+        didSet { UserDefaults.standard.set(bgTint, forKey: Self.bgTintKey) }
+    }
+    @Published var bgButtonShape: ButtonShape {
+        didSet { UserDefaults.standard.set(bgButtonShape.rawValue, forKey: Self.bgButtonShapeKey) }
+    }
+    @Published var bgDisableStretch: Bool {
+        didSet { UserDefaults.standard.set(bgDisableStretch, forKey: Self.bgDisableStretchKey) }
+    }
 
     private static let decoderIPKey = "decoderIP"
     private static let bgColor1Key = "bgColor1"
     private static let bgColor2Key = "bgColor2"
     private static let bgWeightKey = "bgWeight"
     private static let bgSpreadKey = "bgSpread"
+    private static let bgTintKey = "bgTint"
+    private static let bgButtonShapeKey = "bgButtonShape"
+    private static let bgDisableStretchKey = "bgDisableStretch"
 
     private static var bgImageURL: URL {
         URL.documentsDirectory.appendingPathComponent("bgImage.jpg")
@@ -73,11 +86,16 @@ final class RemoteViewModel: ObservableObject {
 
     init() {
         decoderIP = UserDefaults.standard.string(forKey: Self.decoderIPKey) ?? ""
-        bgColor1 = Color(hex: UserDefaults.standard.string(forKey: Self.bgColor1Key) ?? "") ?? Color(red: 0.08, green: 0.08, blue: 0.10)
-        bgColor2 = Color(hex: UserDefaults.standard.string(forKey: Self.bgColor2Key) ?? "") ?? Color(red: 0.97, green: 0.38, blue: 0.12)
+        bgColor1 = Color(hex: UserDefaults.standard.string(forKey: Self.bgColor1Key) ?? "") ?? Color(hex: "000000") ?? .black
+        bgColor2 = Color(hex: UserDefaults.standard.string(forKey: Self.bgColor2Key) ?? "") ?? Color(hex: "FF6A00") ?? .orange
         bgImageData = try? Data(contentsOf: Self.bgImageURL)
         bgWeight = UserDefaults.standard.object(forKey: Self.bgWeightKey) as? Double ?? 0.5
         bgSpread = UserDefaults.standard.object(forKey: Self.bgSpreadKey) as? Double ?? 0.5
+        let majorVersion = Int(UIDevice.current.systemVersion.split(separator: ".").first ?? "") ?? 0
+        bgTint = UserDefaults.standard.object(forKey: Self.bgTintKey) as? Double ?? (majorVersion >= 27 ? 0.5 : 0)
+        bgButtonShape = UserDefaults.standard.string(forKey: Self.bgButtonShapeKey)
+            .flatMap(ButtonShape.init(rawValue:)) ?? .squircle
+        bgDisableStretch = UserDefaults.standard.object(forKey: Self.bgDisableStretchKey) as? Bool ?? false
     }
 
     var canSend: Bool {
@@ -123,6 +141,7 @@ final class RemoteViewModel: ObservableObject {
 
         isScanning = true
         foundDecoders = []
+        shouldAutoRetry = false
         status = .scanning
 
         Task {
@@ -134,11 +153,20 @@ final class RemoteViewModel: ObservableObject {
                 if let first = hits.first {
                     decoderIP = first
                     status = .connected
+                    shouldAutoRetry = false
                 } else {
                     status = .notFound
+                    shouldAutoRetry = true
                 }
                 isScanning = false
             }
+        }
+    }
+
+    func onActive() {
+        if shouldAutoRetry {
+            shouldAutoRetry = false
+            scanLocalNetwork()
         }
     }
 
@@ -269,5 +297,19 @@ extension Color {
             blue: Double(int & 0xFF) / 255,
             opacity: 1
         )
+    }
+}
+
+enum ButtonShape: String, CaseIterable, Identifiable {
+    case squircle
+    case circle
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .squircle: "Squircle"
+        case .circle: "Circulaire"
+        }
     }
 }

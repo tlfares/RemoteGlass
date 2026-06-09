@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Orange Remote</string>
+	<string>RemoteGlass</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,12 +26,14 @@
 		<true/>
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Orange Remote doit accéder au réseau local pour trouver et piloter votre décodeur TV Orange.</string>
+	<string>RemoteGlass doit accéder au réseau local pour trouver et piloter votre décodeur TV Orange.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
 		<string></string>
 	</dict>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDarkContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

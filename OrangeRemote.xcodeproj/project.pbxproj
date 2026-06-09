@@ -11,7 +11,6 @@
 		0A0000010000000000000002 /* OrangeKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000012 /* OrangeKey.swift */; };
 		0A0000010000000000000003 /* OrangeRemoteClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000013 /* OrangeRemoteClient.swift */; };
 		0A0000010000000000000004 /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000014 /* RemoteView.swift */; };
-		0A0000010000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000016 /* Assets.xcassets */; };
 		6244E6FF2FD4A75E0089C5DE /* RemoteGlass.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6244E6FE2FD4A75D0089C5DE /* RemoteGlass.icon */; };
 /* End PBXBuildFile section */
 
@@ -22,7 +21,6 @@
 		0A0000010000000000000013 /* OrangeRemoteClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrangeRemoteClient.swift; sourceTree = "<group>"; };
 		0A0000010000000000000014 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
 		0A0000010000000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0A0000010000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6244E6FE2FD4A75D0089C5DE /* RemoteGlass.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = RemoteGlass.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,7 +52,6 @@
 				0A0000010000000000000013 /* OrangeRemoteClient.swift */,
 				0A0000010000000000000014 /* RemoteView.swift */,
 				0A0000010000000000000015 /* Info.plist */,
-				0A0000010000000000000016 /* Assets.xcassets */,
 			);
 			path = OrangeRemote;
 			sourceTree = "<group>";
@@ -129,7 +126,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0A0000010000000000000005 /* Assets.xcassets in Resources */,
 				6244E6FF2FD4A75E0089C5DE /* RemoteGlass.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -283,6 +279,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OrangeRemote/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RemoteGlass;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -307,6 +304,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = OrangeRemote/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = RemoteGlass;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
