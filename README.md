@@ -7,7 +7,8 @@ Simple remote app for Orange France TV decoders and GoogleTV/AndroidTV devices, 
 - No login
 - Liquid Glass
 - Should work with all Orange decoders (Currently tested with Livebox 5's UHD Decoder)
-- Should work with all GoogleTV/AndroidTV devices
+- Works with all GoogleTV/AndroidTV devices using the AndroidTV Remote v2 protocol (every single of them except Amazon FireTV devices, I guess)
+- Multi devices pairing
 - Customizable background with gradient or photo
 - Haptic feedbacks
 - ADS FREE
@@ -35,3 +36,7 @@ The touch response shape has a higher corner radius than the actual remote butto
 The latest version includes two solutions for iOS 26 users.
 - Circular icons option
 - Disabling the HDR highlight and the button stretching in response to touch
+
+
+On iOS 27, the app icon won't change despite the pop-up saying otherwise, until you respring/restart your iPhone. 
+That's an iOS 27 bug that will likely be fixed in an upcoming beta.
