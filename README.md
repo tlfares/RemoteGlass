@@ -1,5 +1,5 @@
 ![Header](header.jpg)
-# Remoteglass
+# RemoteGlass
 Simple remote app for Orange France TV decoders and GoogleTV/AndroidTV devices, built (vibecoded) 100% in Swift.
 
 ## Features
