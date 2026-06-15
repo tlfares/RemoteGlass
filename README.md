@@ -30,7 +30,7 @@ https://testflight.apple.com/join/q1VHxx5y
 - GoogleTV : Enter the PIN and confirm
 
 ## Known issues
-The touch response shape has a higher corner radius of the actual remote buttons, that's an intrinsic Liquid Glass flaw from Apple for every non-circular shapes, Apple fixed that with iOS 27.
+The touch response shape has a higher corner radius than the actual remote buttons, that's an intrinsic Liquid Glass flaw from Apple for every non-circular shapes, Apple fixed that with iOS 27.
 
 The latest version includes two solutions for iOS 26 users.
 - Circular icons option
