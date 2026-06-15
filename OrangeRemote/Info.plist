@@ -8,6 +8,28 @@
 	<string>RemoteGlass</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>RemoteGlassGTV</key>
+			<dict>
+				<key>CFBundleIconFiles</key>
+				<array>
+					<string>RemoteGlassGTV</string>
+				</array>
+				<key>UIPrerenderedIcon</key>
+				<false/>
+			</dict>
+		</dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>RemoteGlass</string>
+			</array>
+		</dict>
+	</dict>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -25,8 +47,14 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_androidtvremote2._tcp</string>
+		<string>_androidtvremote._tcp</string>
+		<string>_androidtv-remote._tcp</string>
+	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>RemoteGlass doit accéder au réseau local pour trouver et piloter votre décodeur TV Orange.</string>
+	<string>RemoteGlass doit accéder au réseau local pour trouver et piloter votre décodeur TV Orange ou votre Google TV.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

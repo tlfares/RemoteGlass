@@ -26,6 +26,8 @@ enum OrangeKey: String, CaseIterable, Identifiable {
     case menu
     case playPause
     case record
+    case keyboard
+    case enter
 
     var id: String { rawValue }
 
@@ -56,6 +58,40 @@ enum OrangeKey: String, CaseIterable, Identifiable {
         case .menu: 139
         case .playPause: 164
         case .record: 167
+        case .keyboard: 0
+        case .enter: 0
+        }
+    }
+
+    var androidKeyCode: Int {
+        switch self {
+        case .power: 26
+        case .zero: 7
+        case .one: 8
+        case .two: 9
+        case .three: 10
+        case .four: 11
+        case .five: 12
+        case .six: 13
+        case .seven: 14
+        case .eight: 15
+        case .nine: 16
+        case .channelUp: 166
+        case .channelDown: 167
+        case .volumeUp: 24
+        case .volumeDown: 25
+        case .mute: 91
+        case .up: 19
+        case .down: 20
+        case .left: 21
+        case .right: 22
+        case .ok: 23
+        case .back: 4
+        case .menu: 3
+        case .playPause: 85
+        case .record: 130
+        case .keyboard: 216
+        case .enter: 66
         }
     }
 }
