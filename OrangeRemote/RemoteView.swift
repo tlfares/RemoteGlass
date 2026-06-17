@@ -36,7 +36,7 @@ struct RemoteView: View {
                     isKeyboardVisible: $model.isKeyboardVisible
                 )
                 .tabItem {
-                    Label(AppTab.remote.rawValue, systemImage: AppTab.remote.systemName)
+                    Label(AppTab.remote.label, systemImage: AppTab.remote.systemName)
                 }
                 .tag(AppTab.remote)
 
@@ -84,7 +84,7 @@ struct RemoteView: View {
                     hasCustomizedColors: $model.hasCustomizedColors
                 )
                 .tabItem {
-                    Label(AppTab.settings.rawValue, systemImage: AppTab.settings.systemName)
+                    Label(AppTab.settings.label, systemImage: AppTab.settings.systemName)
                 }
                 .tag(AppTab.settings)
             }
@@ -116,6 +116,13 @@ private enum AppTab: String, CaseIterable, Identifiable {
     case settings = "Settings"
 
     var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .remote: String(localized: "Remote")
+        case .settings: String(localized: "Settings")
+        }
+    }
 
     var systemName: String {
         switch self {
@@ -742,7 +749,7 @@ private struct ControlSurface: View {
                     VerticalPair(
                         topIcon: "plus",
                         bottomIcon: "minus",
-                        title: "VOL",
+                        title: String(localized: "VOL"),
                         buttonSize: buttonSize,
                         topAction: { send(.volumeUp) },
                         bottomAction: { send(.volumeDown) }
@@ -754,7 +761,7 @@ private struct ControlSurface: View {
 
                 DirectionPad(buttonSize: buttonSize, send: send, sendDirection: sendDirection, provider: provider)
                     .padding(.horizontal, 8)
-                    .offset(y: -(buttonSize * 0.3))
+                    .offset(y: -(buttonSize * 0.45))
 
                 Spacer(minLength: 8)
 
@@ -762,7 +769,7 @@ private struct ControlSurface: View {
                     VerticalPair(
                         topIcon: "chevron.up",
                         bottomIcon: "chevron.down",
-                        title: "CH",
+                        title: String(localized: "CH"),
                         buttonSize: buttonSize,
                         topAction: { send(.channelUp) },
                         bottomAction: { send(.channelDown) }
@@ -771,21 +778,24 @@ private struct ControlSurface: View {
                 }
             }
 
-            HStack(spacing: 10) {
-                RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
-                RemoteButton(systemName: "house.fill", size: buttonSize) { send(.menu) }
-                RemoteButton(systemName: "rectangle.3.group", size: buttonSize) { toggleClean() }
-            }
+            Group {
+                HStack(spacing: 10) {
+                    RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
+                    RemoteButton(systemName: "house.fill", size: buttonSize) { send(.menu) }
+                    RemoteButton(systemName: "rectangle.3.group", size: buttonSize) { toggleClean() }
+                }
 
-            VStack(spacing: 6) {
-                ForEach(keypad.indices, id: \.self) { row in
-                    HStack(spacing: 8) {
-                        ForEach(keypad[row]) { key in
-                            RemoteButton(title: digitTitle(for: key), size: buttonSize) { send(key) }
+                VStack(spacing: 6) {
+                    ForEach(keypad.indices, id: \.self) { row in
+                        HStack(spacing: 8) {
+                            ForEach(keypad[row]) { key in
+                                RemoteButton(title: digitTitle(for: key), size: buttonSize) { send(key) }
+                            }
                         }
                     }
                 }
             }
+            .offset(y: -4)
         }
     }
 
@@ -821,6 +831,19 @@ private struct CleanControlSurface: View {
 
     private var isKeyboardCompactHeight: Bool {
         isCompact || UIScreen.main.bounds.width <= 400
+    }
+
+    private var isMini: Bool {
+        let model: String
+        if let sim = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] {
+            model = sim
+        } else {
+            var systemInfo = utsname()
+            uname(&systemInfo)
+            let mirror = Mirror(reflecting: systemInfo.machine)
+            model = mirror.children.compactMap { $0.value as? Int8 }.filter { $0 != 0 }.map { String(UnicodeScalar(UInt8($0))) }.joined()
+        }
+        return model == "iPhone13,1" || model == "iPhone14,4"
     }
 
     var body: some View {
@@ -891,11 +914,13 @@ private struct CleanControlSurface: View {
 
             TouchPad(buttonSize: buttonSize, send: send, sendDirection: sendDirection, isKeyboardMinimized: isKeyboardVisible, provider: provider, keyboardCompact: isKeyboardCompactHeight)
 
-            HStack(spacing: 10) {
-                RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
-                RemoteButton(systemName: "playpause.fill", size: buttonSize) { send(.playPause) }
-                RemoteButton(systemName: "house.fill", size: buttonSize) { send(.menu) }
-                RemoteButton(systemName: "square.grid.3x3", size: buttonSize) { toggleClassic() }
+            if !(isKeyboardVisible && isMini) {
+                HStack(spacing: 10) {
+                    RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
+                    RemoteButton(systemName: "playpause.fill", size: buttonSize) { send(.playPause) }
+                    RemoteButton(systemName: "house.fill", size: buttonSize) { send(.menu) }
+                    RemoteButton(systemName: "square.grid.3x3", size: buttonSize) { toggleClassic() }
+                }
             }
         }
     }
@@ -1059,7 +1084,7 @@ private struct DirectionPad: View {
                 if provider == "Android TV" {
                     LongPressOkButton(size: buttonSize, send: send, sendDirection: sendDirection)
                 } else {
-                    RemoteButton(title: "OK", size: buttonSize, prominent: true) { send(.ok) }
+                    RemoteButton(title: String(localized: "OK"), size: buttonSize, prominent: true) { send(.ok) }
                 }
                 RemoteButton(systemName: "chevron.right", size: buttonSize) { send(.right) }
             }
@@ -1197,7 +1222,7 @@ private struct RemoteButton: View {
         }
         .buttonStyle(RemoteGlassButtonStyle(prominent: prominent))
         .tint(tint)
-        .accessibilityLabel(title ?? systemName ?? "Commande")
+        .accessibilityLabel(title ?? systemName ?? String(localized: "Commande"))
     }
 }
 
@@ -1326,9 +1351,15 @@ private struct BackgroundSettingsPanel: View {
     ]
 
     private enum BackgroundMode: String, CaseIterable, Identifiable {
-        case gradient = "Dégradé"
-        case image = "Photo"
+        case gradient
+        case image
         var id: String { rawValue }
+        var localizedName: String {
+            switch self {
+            case .gradient: String(localized: "Dégradé")
+            case .image: String(localized: "Photo")
+            }
+        }
     }
 
     var body: some View {
@@ -1403,7 +1434,7 @@ private struct BackgroundSettingsPanel: View {
             if isBackgroundExpanded {
                 Picker("Mode", selection: $mode) {
                     ForEach(BackgroundMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
+                        Text(mode.localizedName).tag(mode)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -1531,12 +1562,24 @@ private struct BackgroundSettingsPanel: View {
             .buttonStyle(.plain)
 
             if isButtonsExpanded {
-                Picker("Forme des boutons", selection: $buttonShape) {
-                    ForEach(ButtonShape.allCases) { shape in
-                        Text(shape.label).tag(shape)
+                let isCircular = buttonShape == .circle
+                Button {
+                    withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
+                        buttonShape = isCircular ? .squircle : .circle
                     }
+                } label: {
+                    Text("Boutons circulaires")
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: 44)
+                        .overlay(alignment: .leading) {
+                            Image(systemName: isCircular ? "checkmark.circle.fill" : "circle")
+                                .font(.title3)
+                                .foregroundStyle(isCircular ? accentColor : .white.opacity(0.6))
+                                .padding(.leading, 16)
+                        }
                 }
-                .pickerStyle(.segmented)
+                .buttonStyle(RemoteGlassButtonStyle(prominent: isCircular))
 
                 Toggle("Désactiver HDR et étirement", isOn: $disableStretch)
                     .font(.caption)
@@ -1610,7 +1653,7 @@ private struct PhotoPickerLabel: View {
     var hasImage: Bool
 
     var body: some View {
-        Label(hasImage ? "Changer la photo" : "Choisir une photo",
+        Label(hasImage ? String(localized: "Changer la photo") : String(localized: "Choisir une photo"),
               systemImage: "photo.fill")
             .frame(maxWidth: .infinity)
             .frame(minHeight: 52)
@@ -1825,7 +1868,7 @@ private struct VisibleTextField: UIViewRepresentable {
         tf.textColor = .white
         tf.backgroundColor = .clear
         tf.attributedPlaceholder = NSAttributedString(
-            string: "Saisissez votre texte…",
+            string: String(localized: "Saisissez votre texte…"),
             attributes: [.foregroundColor: UIColor.white.withAlphaComponent(0.35)]
         )
         tf.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
@@ -2036,7 +2079,7 @@ private struct OnboardingView: View {
         .padding(.horizontal, 24)
     }
 
-    private func providerButton(name: String, isSelected: Bool, @ViewBuilder icon: () -> some View, action: @escaping () -> Void) -> some View {
+    private func providerButton(name: LocalizedStringKey, isSelected: Bool, @ViewBuilder icon: () -> some View, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 8) {
                 icon()
@@ -2086,8 +2129,8 @@ private struct OnboardingView: View {
 
 private struct CompatibleRow: View {
     let colors: [Color]
-    let name: String
-    let description: String
+    let name: LocalizedStringKey
+    let description: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 8) {

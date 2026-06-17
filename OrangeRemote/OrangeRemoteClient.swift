@@ -425,7 +425,7 @@ final class RemoteViewModel: ObservableObject {
         cancelPairing()
         androidTVIP = device.ip
         pendingAndroidTVPairing = device
-        pairingMessage = "Connexion à \(device.name)…"
+        pairingMessage = String(localized: "Connexion à \(device.name)…")
         status = .pairing
 
         Task {
@@ -437,12 +437,12 @@ final class RemoteViewModel: ObservableObject {
                 )
                 await MainActor.run {
                     pairingSession = session
-                    pairingMessage = "Saisis le code affiché sur \(device.name)."
+                    pairingMessage = String(localized: "Saisis le code affiché sur \(device.name).")
                     status = .pairing
                 }
             } catch {
                 await MainActor.run {
-                    pairingMessage = "Impossible de lancer l'appairage : \(error.localizedDescription)"
+                    pairingMessage = String(localized: "Impossible de lancer l'appairage : \(error.localizedDescription)")
                     status = .failed
                 }
             }
@@ -452,12 +452,12 @@ final class RemoteViewModel: ObservableObject {
     func finishAndroidTVPairing(pin: String) {
         guard let session = pairingSession,
               let device = pendingAndroidTVPairing else {
-            pairingMessage = "Relance l'appairage."
+            pairingMessage = String(localized: "Relance l'appairage.")
             status = .failed
             return
         }
 
-        pairingMessage = "Validation du code…"
+        pairingMessage = String(localized: "Validation du code…")
         status = .pairing
 
         Task {
@@ -478,7 +478,7 @@ final class RemoteViewModel: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
-                    pairingMessage = "Code refusé ou appairage expiré : \(error.localizedDescription)"
+                    pairingMessage = String(localized: "Code refusé ou appairage expiré : \(error.localizedDescription)")
                     status = .failed
                 }
             }
@@ -581,16 +581,16 @@ enum ConnectionStatus: Equatable {
 
     func title(for provider: String) -> String {
         switch self {
-        case .idle: "Prêt"
-        case .needsAddress: provider == "Android TV" ? "Adresse Google TV requise" : "Adresse requise"
-        case .scanning: "Recherche…"
-        case .pairing: "Appairage…"
-        case .needsPairing: "Appairage requis"
-        case .notFound: provider == "Android TV" ? "Aucun appareil Google TV trouvé" : "Aucun décodeur"
-        case .testing: "Test…"
-        case .sending: "Envoi…"
-        case .connected: "Connecté"
-        case .failed: "Injoignable"
+        case .idle: String(localized: "Prêt")
+        case .needsAddress: provider == "Android TV" ? String(localized: "Adresse Google TV requise") : String(localized: "Adresse du décodeur Orange requise")
+        case .scanning: String(localized: "Recherche…")
+        case .pairing: String(localized: "Appairage…")
+        case .needsPairing: String(localized: "Appairage requis")
+        case .notFound: provider == "Android TV" ? String(localized: "Aucun appareil Google TV trouvé") : String(localized: "Aucun décodeur Orange")
+        case .testing: String(localized: "Test…")
+        case .sending: String(localized: "Envoi…")
+        case .connected: String(localized: "Connecté")
+        case .failed: String(localized: "Injoignable")
         }
     }
 }
@@ -921,17 +921,17 @@ private enum AndroidTVProtocolError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .identityUnavailable:
-            "certificat client indisponible"
+            String(localized: "certificat client indisponible")
         case .invalidCertificate:
-            "certificat TLS invalide"
+            String(localized: "certificat TLS invalide")
         case .invalidFrame:
-            "message protocole invalide"
+            String(localized: "message protocole invalide")
         case .pairingRejected:
-            "demande refusée par la Google TV"
+            String(localized: "demande refusée par la Google TV")
         case .pairingFailed(let status):
-            "statut \(status) du Google TV"
+            String(localized: "statut \(status) du Google TV")
         case .timedOut(let stage):
-            "timeout pendant \(stage)"
+            String(localized: "timeout pendant \(stage)")
         case .allPairingPortsFailed(let errors):
             errors.joined(separator: " ; ")
         }
@@ -2044,8 +2044,8 @@ enum ButtonShape: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .squircle: "Squircle"
-        case .circle: "Circulaire"
+        case .squircle: String(localized: "Squircle")
+        case .circle: String(localized: "Circulaire")
         }
     }
 }

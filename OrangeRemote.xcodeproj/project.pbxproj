@@ -11,6 +11,8 @@
 		0A0000010000000000000002 /* OrangeKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000012 /* OrangeKey.swift */; };
 		0A0000010000000000000003 /* OrangeRemoteClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000013 /* OrangeRemoteClient.swift */; };
 		0A0000010000000000000004 /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000014 /* RemoteView.swift */; };
+		0A0000010000000000000021 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000024 /* Localizable.xcstrings */; };
+		0A0000010000000000000023 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000022 /* InfoPlist.xcstrings */; };
 		6244E6FF2FD4A75E0089C5DE /* RemoteGlass.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6244E6FE2FD4A75D0089C5DE /* RemoteGlass.icon */; };
 		6244E7022FD4A75E0089C5DE /* RemoteGlassGTV.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6244E7032FD4A75E0089C5DE /* RemoteGlassGTV.icon */; };
 		6244E7102FD4A75E0089C5DE /* Assets/orangedecoder.png in Resources */ = {isa = PBXBuildFile; fileRef = 6244E7112FD4A75E0089C5DE /* Assets/orangedecoder.png */; };
@@ -24,6 +26,8 @@
 		0A0000010000000000000013 /* OrangeRemoteClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrangeRemoteClient.swift; sourceTree = "<group>"; };
 		0A0000010000000000000014 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
 		0A0000010000000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0A0000010000000000000022 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		0A0000010000000000000024 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6244E6FE2FD4A75D0089C5DE /* RemoteGlass.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = RemoteGlass.icon; sourceTree = "<group>"; };
 		6244E7032FD4A75E0089C5DE /* RemoteGlassGTV.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = RemoteGlassGTV.icon; sourceTree = "<group>"; };
 		6244E7112FD4A75E0089C5DE /* Assets/orangedecoder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Assets/orangedecoder.png; sourceTree = "<group>"; };
@@ -61,6 +65,8 @@
 				0A0000010000000000000015 /* Info.plist */,
 				6244E7112FD4A75E0089C5DE /* Assets/orangedecoder.png */,
 				6244E7132FD4A75E0089C5DE /* Assets/playerpop.png */,
+				0A0000010000000000000024 /* Localizable.xcstrings */,
+				0A0000010000000000000022 /* InfoPlist.xcstrings */,
 			);
 			path = OrangeRemote;
 			sourceTree = "<group>";
@@ -139,6 +145,8 @@
 				6244E7022FD4A75E0089C5DE /* RemoteGlassGTV.icon in Resources */,
 				6244E7102FD4A75E0089C5DE /* Assets/orangedecoder.png in Resources */,
 				6244E7122FD4A75E0089C5DE /* Assets/playerpop.png in Resources */,
+				0A0000010000000000000021 /* Localizable.xcstrings in Resources */,
+				0A0000010000000000000023 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,7 +305,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fares.remoteglass.5Z8VG8C6J3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -323,7 +331,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fares.remoteglass.5Z8VG8C6J3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
