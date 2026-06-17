@@ -40,3 +40,6 @@ The latest version includes two solutions for iOS 26 users.
 
 On iOS 27, the app icon won't change despite the pop-up saying otherwise, until you respring/restart your iPhone. 
 That's an iOS 27 bug that will likely be fixed in an upcoming beta.
+
+
+While using a white-based gradient, the buttons behind the white part become clearer than the others, I really don't know how to fix this while keeping a native Liquid Glass rendering.
