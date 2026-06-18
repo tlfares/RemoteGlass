@@ -1501,6 +1501,7 @@ private struct BackgroundSettingsPanel: View {
                                         .foregroundStyle(isGoogleTVTheme ? accentColor : .white.opacity(0.6))
                                         .padding(.leading, 16)
                                 }
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(RemoteGlassButtonStyle(prominent: isGoogleTVTheme))
 
@@ -1515,6 +1516,7 @@ private struct BackgroundSettingsPanel: View {
                             Label("Réinitialiser", systemImage: "arrow.counterclockwise")
                                 .frame(maxWidth: .infinity)
                                 .frame(minHeight: 40)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(RemoteGlassButtonStyle())
                     }
@@ -1532,6 +1534,7 @@ private struct BackgroundSettingsPanel: View {
                             Label("Supprimer la photo", systemImage: "trash")
                                 .frame(maxWidth: .infinity)
                                 .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(RemoteGlassButtonStyle())
                     }
@@ -1578,6 +1581,7 @@ private struct BackgroundSettingsPanel: View {
                                 .foregroundStyle(isCircular ? accentColor : .white.opacity(0.6))
                                 .padding(.leading, 16)
                         }
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(RemoteGlassButtonStyle(prominent: isCircular))
 
@@ -1657,6 +1661,7 @@ private struct PhotoPickerLabel: View {
               systemImage: "photo.fill")
             .frame(maxWidth: .infinity)
             .frame(minHeight: 52)
+            .contentShape(Rectangle())
     }
 }
 
