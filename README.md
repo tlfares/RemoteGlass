@@ -8,12 +8,14 @@ Simple remote app for Orange France TV decoders and GoogleTV/AndroidTV devices, 
 - Liquid Glass
 - Should work with all Orange decoders (Currently tested with Livebox 5's UHD Decoder)
 - Works with all GoogleTV/AndroidTV devices using the AndroidTV Remote v2 protocol (every single of them except Amazon FireTV devices, I guess)
-- Multi devices pairing
+- Multi Google TV devices pairing without repairing
+- Keyboard for GoogleTV (Unfortunately, Orange decoders do not support keyboard input)
 - Customizable background with gradient or photo
 - Haptic feedbacks
 - ADS FREE
 - Compact mode with TrackPad
 - Squircle or Circular buttons
+  
 
 ## Installation
 Grab the latest .ipa in the Releases section and install it with any sideloading method (ALtStore, SideStore, Sideloadly,..). Also works completely fine inside LiveContainer.
@@ -43,3 +45,5 @@ That's an iOS 27 bug that will likely be fixed in an upcoming beta.
 
 
 While using a white-based gradient, the buttons behind the white part become clearer than the others, I really don't know how to fix this while keeping a native Liquid Glass rendering.
+
+While using a photo wallpaper for Google TV users, the buttons below the trackpad might go half behind the keyboard on some devices, currently trying to find a fix.
