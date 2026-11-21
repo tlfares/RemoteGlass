@@ -215,7 +215,7 @@ struct SettingsTab: View {
                 Text("Credits :")
                     .font(.caption2)
                     .foregroundStyle(.white.opacity(0.5))
-                Link("@rmxptfl", destination: URL(string: "https://twitter.com/rmxptfl")!)
+                Link("@rmxptfl", destination: URL(string: "https://tlfares.pages.dev")!)
                     .font(.caption2)
                     .underline()
                     .foregroundStyle(.white.opacity(0.7))
