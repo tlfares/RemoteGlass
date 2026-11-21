@@ -52,9 +52,11 @@
 		<string>_androidtvremote2._tcp</string>
 		<string>_androidtvremote._tcp</string>
 		<string>_androidtv-remote._tcp</string>
+		<string>_airplay._tcp</string>
+		<string>_ws._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>RemoteGlass doit accéder au réseau local pour trouver et piloter votre décodeur TV Orange ou votre Google TV.</string>
+	<string>RemoteGlass doit accéder au réseau local pour trouver et piloter vos décodeurs TV (Orange, SFR, Freebox) et vos TV connectées.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>RemoteGlass a besoin d'accéder à vos photos pour choisir un fond d'écran personnalisé.</string>
 	<key>UILaunchScreen</key>
@@ -67,6 +69,13 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>

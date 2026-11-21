@@ -1,11 +1,58 @@
 {
   "sourceLanguage" : "fr",
   "strings" : {
-    "@rmxptfl" : {
+    "" : {
 
     },
+    "@rmxptfl" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@rmxptfl"
+          }
+        }
+      }
+    },
     "%lld%%" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%%"
+          }
+        }
+      }
+    },
+    "192.168.1.20" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "192.168.1.20"
+          }
+        }
+      }
+    },
+    "À droite" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the right"
+          }
+        }
+      }
+    },
+    "Accepte la demande de connexion qui s'affiche sur la TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accept the connection request shown on the TV."
+          }
+        }
+      }
     },
     "Adresse du décodeur Orange requise" : {
       "extractionState" : "manual",
@@ -37,6 +84,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adresse Google TV requise"
+          }
+        }
+      }
+    },
+    "Adresse IP" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IP Address"
+          }
+        }
+      }
+    },
+    "Adresse MAC (facultatif)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MAC Address (optional)"
+          }
+        }
+      }
+    },
+    "Ajoute le bouton power d'un autre onglet à côté de celui-ci — par exemple celui de la TV sur l'onglet de la box." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds the power button of another tab next to this one — for example the TV's on the set-top box tab."
+          }
+        }
+      }
+    },
+    "Ajoute ton décodeur ou ta TV : tout reste sur ton réseau local." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your set-top box or TV: everything stays on your local network."
+          }
+        }
+      }
+    },
+    "Ajouter un appareil" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a Device"
           }
         }
       }
@@ -92,6 +189,16 @@
         }
       }
     },
+    "appareil injoignable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "device unreachable"
+          }
+        }
+      }
+    },
     "Appareils enregistrés" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -109,6 +216,46 @@
         }
       }
     },
+    "Arrondis" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rounded"
+          }
+        }
+      }
+    },
+    "Associe ta TV à ta box : power TV et volume TV dans la même télécommande." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pair your TV with your box: TV power and TV volume in the same remote."
+          }
+        }
+      }
+    },
+    "Aucun" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
+    "Aucun appareil" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Device"
+          }
+        }
+      }
+    },
     "Aucun appareil Google TV trouvé" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -122,6 +269,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun appareil Google TV trouvé"
+          }
+        }
+      }
+    },
+    "Aucun appareil trouvé" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Devices Found"
           }
         }
       }
@@ -194,6 +351,16 @@
         }
       }
     },
+    "Bouton power en plus" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra Power Button"
+          }
+        }
+      }
+    },
     "Boutons" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -228,8 +395,35 @@
         }
       }
     },
-    "Bouygues" : {
-
+    "BOX" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BOX"
+          }
+        }
+      }
+    },
+    "Ce modèle Hisense n'autorise pas les télécommandes tierces (il exige un certificat propriétaire). Si ta TV tourne sous Google TV, ajoute-la plutôt en mode Google TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Hisense model doesn't allow third-party remotes (it requires a proprietary certificate). If your TV runs Google TV, add it in Google TV mode instead."
+          }
+        }
+      }
+    },
+    "Ce Player ne répond pas à la télécommande réseau. Les Freebox Pop, Ultra et Mini 4K s'ajoutent en mode Google TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This Player doesn't respond to the network remote. Freebox Pop, Ultra and Mini 4K are added in Google TV mode."
+          }
+        }
+      }
     },
     "certificat client indisponible" : {
       "extractionState" : "manual",
@@ -282,6 +476,16 @@
         }
       }
     },
+    "Change selon l'onglet ouvert" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes with the open tab"
+          }
+        }
+      }
+    },
     "Changer la photo" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -312,6 +516,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vérifier les mises à jour"
+          }
+        }
+      }
+    },
+    "Choisir dans les réglages" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose in Settings"
+          }
+        }
+      }
+    },
+    "Choisir un appareil" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a Device"
           }
         }
       }
@@ -367,6 +591,26 @@
         }
       }
     },
+    "Classique" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classic"
+          }
+        }
+      }
+    },
+    "Code" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code"
+          }
+        }
+      }
+    },
     "Code PIN" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -401,6 +645,26 @@
         }
       }
     },
+    "Code refusé ou expiré. Réessaie." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code rejected or expired. Try again."
+          }
+        }
+      }
+    },
+    "Code refusé. Vérifie le code télécommande réseau dans les réglages du Player." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code rejected. Check the network remote code in the Player's settings."
+          }
+        }
+      }
+    },
     "Commande" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -414,6 +678,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commande"
+          }
+        }
+      }
+    },
+    "Commencer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Started"
+          }
+        }
+      }
+    },
+    "Commun" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared"
           }
         }
       }
@@ -469,23 +753,6 @@
         }
       }
     },
-    "Orange" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orange France"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Orange"
-          }
-        }
-      }
-    },
     "Connect TV" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -520,6 +787,16 @@
         }
       }
     },
+    "Connecter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect"
+          }
+        }
+      }
+    },
     "Connexion" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -550,6 +827,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connexion à %@…"
+          }
+        }
+      }
+    },
+    "connexion refusée sur la TV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "connection refused on the TV"
+          }
+        }
+      }
+    },
+    "Connexion…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting…"
           }
         }
       }
@@ -605,6 +902,36 @@
         }
       }
     },
+    "Décodeur Orange" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orange Set-Top Box"
+          }
+        }
+      }
+    },
+    "Décodeur SFR" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFR Set-Top Box"
+          }
+        }
+      }
+    },
+    "Décodeur TV SFR 4K (STB7), LaBox, décodeur Box 8. Le SFR Connect TV passe par Google TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SFR 4K TV box (STB7), LaBox, Box 8 set-top box. SFR Connect TV uses Google TV."
+          }
+        }
+      }
+    },
     "Dégradé" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -618,6 +945,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dégradé"
+          }
+        }
+      }
+    },
+    "délai dépassé" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "timed out"
           }
         }
       }
@@ -673,6 +1010,26 @@
         }
       }
     },
+    "Disposition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout"
+          }
+        }
+      }
+    },
+    "Écran partagé" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Split Screen"
+          }
+        }
+      }
+    },
     "Envoi…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -686,6 +1043,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Envoi…"
+          }
+        }
+      }
+    },
+    "Fais glisser pour changer l'ordre des onglets. Réglages reste toujours en dernier." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to reorder the tabs. Settings always stays last."
+          }
+        }
+      }
+    },
+    "Fond" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background"
+          }
+        }
+      }
+    },
+    "Fond commun" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared Background"
           }
         }
       }
@@ -724,8 +1111,35 @@
         }
       }
     },
-    "Free" : {
-
+    "Free Player Pop, Bbox, SFR Connect TV, Sony, TCL, Philips, Chromecast…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free Player Pop, Bbox, SFR Connect TV, Sony, TCL, Philips, Chromecast…"
+          }
+        }
+      }
+    },
+    "Freebox Player" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freebox Player"
+          }
+        }
+      }
+    },
+    "Freebox Révolution, Crystal, Delta et One. Pop, Ultra et Mini 4K passent par Google TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freebox Révolution, Crystal, Delta and One. Pop, Ultra and Mini 4K use Google TV."
+          }
+        }
+      }
     },
     "Google TV" : {
       "extractionState" : "manual",
@@ -744,6 +1158,16 @@
         }
       }
     },
+    "Google TV / Android TV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google TV / Android TV"
+          }
+        }
+      }
+    },
     "Hauteur" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -757,6 +1181,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hauteur"
+          }
+        }
+      }
+    },
+    "Impossible de joindre l'appareil. Vérifie qu'il est allumé et sur le même Wi-Fi." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Can't reach the device. Make sure it's on and on the same Wi-Fi."
           }
         }
       }
@@ -829,6 +1263,56 @@
         }
       }
     },
+    "L'appareil ne répond pas." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The device isn't responding."
+          }
+        }
+      }
+    },
+    "L'iPhone doit être sur le même Wi-Fi que tes appareils, et ceux-ci allumés." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iPhone must be on the same Wi-Fi as your devices, and they must be on."
+          }
+        }
+      }
+    },
+    "L'onglet et son appareil seront oubliés. Tu pourras le rajouter à tout moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The tab and its device will be forgotten. You can add it back at any time."
+          }
+        }
+      }
+    },
+    "La TV a refusé la connexion. Autorise RemoteGlass dans les réglages de la TV puis réessaie." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The TV refused the connection. Allow RemoteGlass in the TV's settings, then try again."
+          }
+        }
+      }
+    },
+    "Mes appareils" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Devices"
+          }
+        }
+      }
+    },
     "message protocole invalide" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -863,6 +1347,26 @@
         }
       }
     },
+    "Nom de l'onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab Name"
+          }
+        }
+      }
+    },
+    "Nouvelle télécommande" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Remote"
+          }
+        }
+      }
+    },
     "OK" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -880,19 +1384,69 @@
         }
       }
     },
+    "Onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab"
+          }
+        }
+      }
+    },
+    "Onglet suivant" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next tab"
+          }
+        }
+      }
+    },
     "Orange" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Orange"
+            "value" : "Orange France"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Orange"
+          }
+        }
+      }
+    },
+    "Ordre des onglets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab Order"
+          }
+        }
+      }
+    },
+    "Pas de réponse : la demande n'a pas été acceptée sur la TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No response: the request wasn't accepted on the TV."
+          }
+        }
+      }
+    },
+    "Personnalisé" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
           }
         }
       }
@@ -965,6 +1519,16 @@
         }
       }
     },
+    "Recherche des box et TV…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Looking for boxes and TVs…"
+          }
+        }
+      }
+    },
     "Recherche…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -978,6 +1542,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recherche…"
+          }
+        }
+      }
+    },
+    "Réessayer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Again"
+          }
+        }
+      }
+    },
+    "Regarde ta TV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look at Your TV"
+          }
+        }
+      }
+    },
+    "Réglages" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "Réglages…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
           }
         }
       }
@@ -1016,6 +1620,16 @@
         }
       }
     },
+    "Relancer la détection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan Again"
+          }
+        }
+      }
+    },
     "Remote" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1029,6 +1643,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Télécommande"
+          }
+        }
+      }
+    },
+    "Réorganiser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reorder"
+          }
+        }
+      }
+    },
+    "Réorganiser les onglets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reorder Tabs"
+          }
+        }
+      }
+    },
+    "Roku" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Roku"
+          }
+        }
+      }
+    },
+    "Roku TV, Express, Streaming Stick" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Roku TV, Express, Streaming Stick"
+          }
+        }
+      }
+    },
+    "Ronds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Round"
           }
         }
       }
@@ -1050,6 +1714,16 @@
         }
       }
     },
+    "Saisir une adresse IP" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter an IP Address"
+          }
+        }
+      }
+    },
     "Saisis le code affiché sur %@." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1063,6 +1737,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisis le code affiché sur %@."
+          }
+        }
+      }
+    },
+    "Saisis le code affiché sur la TV." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the code shown on the TV."
+          }
+        }
+      }
+    },
+    "Saisis le code télécommande réseau : sur la TV, Réglages › Système › Informations Freebox Player et Server." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the network remote code: on the TV, Settings › System › Freebox Player and Server information."
           }
         }
       }
@@ -1084,6 +1778,16 @@
         }
       }
     },
+    "Sans adresse MAC, RemoteGlass ne peut pas retrouver l'appareil s'il change d'IP, ni allumer une TV éteinte." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a MAC address, RemoteGlass can't find the device if its IP changes, or turn on a TV that's off."
+          }
+        }
+      }
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1101,8 +1805,15 @@
         }
       }
     },
-    "SFR/RED" : {
-
+    "Source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
     },
     "Squircle" : {
       "extractionState" : "manual",
@@ -1122,7 +1833,14 @@
       }
     },
     "statut %d du Google TV" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google TV status %d"
+          }
+        }
+      }
     },
     "statut %lld du Google TV" : {
       "extractionState" : "manual",
@@ -1141,6 +1859,36 @@
         }
       }
     },
+    "Supprimer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        }
+      }
+    },
+    "Supprimer %@ ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
+          }
+        }
+      }
+    },
+    "Supprimer cette télécommande" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete This Remote"
+          }
+        }
+      }
+    },
     "Supprimer la photo" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1154,6 +1902,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer la photo"
+          }
+        }
+      }
+    },
+    "Sur ton réseau" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On Your Network"
           }
         }
       }
@@ -1192,6 +1950,26 @@
         }
       }
     },
+    "Télécommande" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remote"
+          }
+        }
+      }
+    },
+    "Télécommandes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remotes"
+          }
+        }
+      }
+    },
     "Test…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1205,6 +1983,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Test…"
+          }
+        }
+      }
+    },
+    "Tester la connexion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test Connection"
           }
         }
       }
@@ -1243,6 +2031,36 @@
         }
       }
     },
+    "Ton écran est assez large pour afficher deux télécommandes en même temps." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your screen is wide enough to show two remotes at once."
+          }
+        }
+      }
+    },
+    "touche non prise en charge" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "key not supported"
+          }
+        }
+      }
+    },
+    "Tous les décodeurs TV Orange" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Orange TV set-top boxes"
+          }
+        }
+      }
+    },
     "Tout appareil Android TV / Google TV" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1256,6 +2074,136 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tout appareil Android TV / Google TV"
+          }
+        }
+      }
+    },
+    "Trackpad" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackpad"
+          }
+        }
+      }
+    },
+    "TV" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TV"
+          }
+        }
+      }
+    },
+    "TV Hisense / Toshiba VIDAA (selon le firmware). Les Hisense Google TV ou Roku passent par ces protocoles." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hisense / Toshiba VIDAA TVs (depending on firmware). Hisense Google TV or Roku models use those protocols."
+          }
+        }
+      }
+    },
+    "TV Hisense VIDAA" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hisense VIDAA TV"
+          }
+        }
+      }
+    },
+    "TV LG depuis 2014" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LG TVs since 2014"
+          }
+        }
+      }
+    },
+    "TV LG webOS" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LG webOS TV"
+          }
+        }
+      }
+    },
+    "TV Samsung" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samsung TV"
+          }
+        }
+      }
+    },
+    "TV Samsung Tizen depuis 2016" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Samsung Tizen TVs since 2016"
+          }
+        }
+      }
+    },
+    "Un fond commun, ou un fond différent pour chaque onglet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One shared background, or a different one for each tab."
+          }
+        }
+      }
+    },
+    "Un onglet par télécommande, réorganisable à volonté." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One tab per remote, reorder them as you like."
+          }
+        }
+      }
+    },
+    "Une télécommande = un appareil = un onglet. Si un appareil change d'adresse IP, RemoteGlass le retrouve tout seul grâce à son adresse MAC." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One remote = one device = one tab. If a device's IP address changes, RemoteGlass finds it again on its own using its MAC address."
+          }
+        }
+      }
+    },
+    "Une télécommande pour ta box et ta TV.\nSans compte, sans pub, 100 % en local." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One remote for your box and your TV.\nNo account, no ads, 100% local."
+          }
+        }
+      }
+    },
+    "Utilisé par les réglages et par chaque télécommande qui n'a pas son propre fond." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used by Settings and by every remote that doesn't have its own background."
           }
         }
       }
@@ -1278,7 +2226,14 @@
       }
     },
     "v%@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v%@"
+          }
+        }
+      }
     },
     "Validation du code…" : {
       "extractionState" : "manual",
@@ -1293,6 +2248,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Validation du code…"
+          }
+        }
+      }
+    },
+    "Valider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm"
+          }
+        }
+      }
+    },
+    "Vérifie l'accès au réseau local dans Réglages iOS › RemoteGlass, ou ajoute l'IP à la main." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check local network access in iOS Settings › RemoteGlass, or add the IP manually."
           }
         }
       }
@@ -1327,6 +2302,516 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous êtes sur iOS %@, la teinte du Liquid Glass dépend aussi de vos réglages d'apparence iOS"
+          }
+        }
+      }
+    },
+    "Appareils liés" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linked devices"
+          }
+        }
+      }
+    },
+    "Un nouvel appareil a son propre onglet. Pour en regrouper plusieurs sur un onglet, touche le nom de l'appareil en haut de la télécommande." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new device gets its own tab. To group several on one tab, tap the device name at the top of the remote."
+          }
+        }
+      }
+    },
+    "Les 4 onglets sont pris : un nouvel appareil s'ajoute à un onglet depuis le nom de l'appareil, en haut de la télécommande." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All 4 tabs are in use: add a new device to a tab by tapping the device name at the top of the remote."
+          }
+        }
+      }
+    },
+    "Sur aucun onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not on any tab"
+          }
+        }
+      }
+    },
+    "Oublier %@ ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget %@?"
+          }
+        }
+      }
+    },
+    "Onglets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tabs"
+          }
+        }
+      }
+    },
+    "Un appareil peut apparaître sur plusieurs onglets." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A device can appear on several tabs."
+          }
+        }
+      }
+    },
+    "Oublier cet appareil" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget This Device"
+          }
+        }
+      }
+    },
+    "Oublier" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forget"
+          }
+        }
+      }
+    },
+    "Il disparaîtra de ses onglets. Tu pourras le rajouter à tout moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It will be removed from its tabs. You can add it back at any time."
+          }
+        }
+      }
+    },
+    "Nouvel onglet pour cet appareil" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Tab for This Device"
+          }
+        }
+      }
+    },
+    "Appareils de l'onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devices in This Tab"
+          }
+        }
+      }
+    },
+    "Passe de l'un à l'autre en touchant le nom de l'appareil, en haut de la télécommande." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch between them by tapping the device name at the top of the remote."
+          }
+        }
+      }
+    },
+    "Appareil principal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Main device"
+          }
+        }
+      }
+    },
+    "Nouvel appareil…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Device…"
+          }
+        }
+      }
+    },
+    "Ajouter un appareil à cet onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a Device to This Tab"
+          }
+        }
+      }
+    },
+    "Volume par entrée" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volume per Input"
+          }
+        }
+      }
+    },
+    "Quand la TV passe sur une entrée, son volume est réglé tout seul. Ça marche aussi avec la vraie télécommande, tant que RemoteGlass est ouvert." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the TV switches to an input, its volume is set automatically. This also works with the physical remote, as long as RemoteGlass is open."
+          }
+        }
+      }
+    },
+    "Allume la TV pour voir ses entrées." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on the TV to see its inputs."
+          }
+        }
+      }
+    },
+    "Actuelle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current"
+          }
+        }
+      }
+    },
+    "%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
+    },
+    "Commentaire" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment"
+          }
+        }
+      }
+    },
+    "Bug" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bug"
+          }
+        }
+      }
+    },
+    "Idée" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idea"
+          }
+        }
+      }
+    },
+    "Appareils : %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devices: %@"
+          }
+        }
+      }
+    },
+    "Feedback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback"
+          }
+        }
+      }
+    },
+    "Envoyé directement au développeur, avec : %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent directly to the developer, along with: %@"
+          }
+        }
+      }
+    },
+    "Contact (facultatif) : Telegram, X ou e-mail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact (optional): Telegram, X or email"
+          }
+        }
+      }
+    },
+    "Type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
+    },
+    "Envoyé, merci !" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sent, thank you!"
+          }
+        }
+      }
+    },
+    "Qu'est-ce que tu en penses ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do you think?"
+          }
+        }
+      }
+    },
+    "Qu'est-ce qui ne marche pas ? Sur quel appareil ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What isn't working? On which device?"
+          }
+        }
+      }
+    },
+    "Qu'est-ce qui te manque ?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What are you missing?"
+          }
+        }
+      }
+    },
+    "Retirer la capture" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Screenshot"
+          }
+        }
+      }
+    },
+    "Capture d'écran" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot"
+          }
+        }
+      }
+    },
+    "Capture jointe" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screenshot attached"
+          }
+        }
+      }
+    },
+    "Envoyer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send"
+          }
+        }
+      }
+    },
+    "Trop de messages, réessaie dans un moment." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many messages, try again in a moment."
+          }
+        }
+      }
+    },
+    "La capture dépasse 10 Mo." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The screenshot is larger than 10 MB."
+          }
+        }
+      }
+    },
+    "Envoi impossible. Réessaie plus tard." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't send. Try again later."
+          }
+        }
+      }
+    },
+    "Rien de branché" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing connected"
+          }
+        }
+      }
+    },
+    "Dans cet onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In This Tab"
+          }
+        }
+      }
+    },
+    "Ajouter un appareil ici" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a Device Here"
+          }
+        }
+      }
+    },
+    "Retirer de cet onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from This Tab"
+          }
+        }
+      }
+    },
+    "Un onglet par appareil (4 au maximum). Un onglet peut aussi en regrouper plusieurs : touche le nom de l'appareil en haut de la télécommande." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One tab per device (4 at most). A tab can also group several: tap the device name at the top of the remote."
+          }
+        }
+      }
+    },
+    "Seconde télécommande (à droite, ou en bas en portrait)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Second remote (on the right, or at the bottom in portrait)"
+          }
+        }
+      }
+    },
+    "Le deuxième onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The second tab"
+          }
+        }
+      }
+    },
+    "Automatique" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        }
+      }
+    },
+    "Ses appareils restent dans « Appareils liés »." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its devices stay in “Linked devices”."
+          }
+        }
+      }
+    },
+    "Nouvel onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Tab"
+          }
+        }
+      }
+    },
+    "Supprimer cet onglet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete This Tab"
           }
         }
       }

@@ -28,6 +28,7 @@ enum OrangeKey: String, CaseIterable, Identifiable {
     case record
     case keyboard
     case enter
+    case input
 
     var id: String { rawValue }
 
@@ -60,6 +61,7 @@ enum OrangeKey: String, CaseIterable, Identifiable {
         case .record: 167
         case .keyboard: 0
         case .enter: 0
+        case .input: 0
         }
     }
 
@@ -92,6 +94,7 @@ enum OrangeKey: String, CaseIterable, Identifiable {
         case .record: 130
         case .keyboard: 216
         case .enter: 66
+        case .input: 178
         }
     }
 }

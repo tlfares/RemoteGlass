@@ -25,546 +25,34 @@ struct OrangeRemoteClient {
     }
 
     func ping() async -> Bool {
-        do {
-            try await send(.power, mode: .release)
-            return true
-        } catch {
-            return false
-        }
+        await Self.probe(ip: decoderIP, timeout: 1.5) != nil
+    }
+
+    /// Interroge l'API d'état du décodeur (operation=10) : lecture seule, aucune touche envoyée.
+    /// Renvoie nil si l'hôte ne répond pas comme un décodeur Orange.
+    nonisolated static func probe(ip: String, timeout: TimeInterval) async -> OrangeDecoder? {
+        guard let url = URL(string: "http://\(ip):8080/remoteControl/cmd?operation=10") else { return nil }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = timeout
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              let http = response as? HTTPURLResponse,
+              (200..<500).contains(http.statusCode) else { return nil }
+
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let result = json?["result"] as? [String: Any]
+        let info = result?["data"] as? [String: Any]
+        guard result != nil else { return nil }
+        let name = (info?["friendlyName"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let mac = (info?["macAddress"] as? String)?.uppercased()
+        return OrangeDecoder(ip: ip, name: name?.isEmpty == false ? name : nil, mac: mac?.isEmpty == false ? mac : nil)
     }
 }
 
-@MainActor
-final class RemoteViewModel: ObservableObject {
-    @Published var decoderIP: String {
-        didSet { UserDefaults.standard.set(decoderIP, forKey: Self.decoderIPKey) }
-    }
-    @Published var status: ConnectionStatus = .idle
-    @Published var isScanning = false
-    @Published var foundDecoders: [String] = []
-    @Published var shouldAutoRetry = false
-    private var scanGeneration = 0
-    @Published var bgColors: [Color] {
-        didSet {
-            let hexes = bgColors.map { $0.hex }
-            UserDefaults.standard.set(hexes, forKey: Self.bgColorsKey)
-        }
-    }
-    @Published var bgImageData: Data? {
-        didSet {
-            if let data = bgImageData {
-                try? data.write(to: Self.bgImageURL, options: .atomic)
-            } else {
-                try? FileManager.default.removeItem(at: Self.bgImageURL)
-            }
-        }
-    }
-    @Published var bgShowPhoto: Bool {
-        didSet { UserDefaults.standard.set(bgShowPhoto, forKey: Self.bgShowPhotoKey) }
-    }
-    @Published var bgWeight: Double {
-        didSet { UserDefaults.standard.set(bgWeight, forKey: Self.bgWeightKey) }
-    }
-    @Published var bgSpread: Double {
-        didSet { UserDefaults.standard.set(bgSpread, forKey: Self.bgSpreadKey) }
-    }
-    @Published var bgTint: Double {
-        didSet { UserDefaults.standard.set(bgTint, forKey: Self.bgTintKey) }
-    }
-    @Published var bgButtonShape: ButtonShape {
-        didSet { UserDefaults.standard.set(bgButtonShape.rawValue, forKey: Self.bgButtonShapeKey) }
-    }
-    @Published var bgDisableStretch: Bool {
-        didSet { UserDefaults.standard.set(bgDisableStretch, forKey: Self.bgDisableStretchKey) }
-    }
-    @Published var hasCustomizedColors: Bool {
-        didSet { UserDefaults.standard.set(hasCustomizedColors, forKey: Self.hasCustomizedColorsKey) }
-    }
-    @Published var selectedProvider: String {
-        didSet {
-            UserDefaults.standard.set(selectedProvider, forKey: Self.selectedProviderKey)
-            if oldValue != selectedProvider {
-                cancelScan()
-                if !hasCustomizedColors && bgImageData == nil {
-                    bgColors = Self.defaultPreset(for: selectedProvider)
-                }
-            }
-        }
-    }
-    @Published var androidTVIP: String {
-        didSet { UserDefaults.standard.set(androidTVIP, forKey: Self.androidTVIPKey) }
-    }
-    @Published var androidTVPairedDevice: String {
-        didSet { UserDefaults.standard.set(androidTVPairedDevice, forKey: Self.androidTVPairedDeviceKey) }
-    }
-    @Published var androidTVServiceName: String {
-        didSet { UserDefaults.standard.set(androidTVServiceName, forKey: Self.androidTVServiceNameKey) }
-    }
-    @Published var discoveredAndroidTV: [DiscoveredAndroidTVDevice] = []
-    @Published var pendingAndroidTVPairing: DiscoveredAndroidTVDevice?
-    @Published var pairingMessage: String?
-    @Published var isKeyboardVisible = false {
-        didSet {
-            if !isKeyboardVisible {
-                lastKeyboardDismissTime = Date()
-            }
-        }
-    }
-    private var lastKeyboardDismissTime: Date?
-
-    @Published var savedGTVDevices: [SavedGTVDevice] = [] {
-        didSet {
-            guard let data = try? JSONEncoder().encode(savedGTVDevices) else { return }
-            UserDefaults.standard.set(data, forKey: Self.savedGTVDevicesKey)
-        }
-    }
-
-    private var scanTask: Task<Void, Never>?
-    private var pairingSession: AndroidTVPairingSession?
-    private var androidTVRemoteClient: AndroidTVRemoteClient?
-    private var sendTextTask: Task<Void, Never>?
-
-    private static let decoderIPKey = "decoderIP"
-    private static let bgColorsKey = "bgColors"
-    private static let bgShowPhotoKey = "bgShowPhoto"
-    private static let bgWeightKey = "bgWeight"
-    private static let bgSpreadKey = "bgSpread"
-    private static let bgTintKey = "bgTint"
-    private static let bgButtonShapeKey = "bgButtonShape"
-    private static let bgDisableStretchKey = "bgDisableStretch"
-    private static let hasCustomizedColorsKey = "hasCustomizedColors"
-    private static let selectedProviderKey = "selectedProvider"
-    private static let androidTVIPKey = "androidTVIP"
-    private static let androidTVPairedDeviceKey = "androidTVPairedDevice"
-    private static let androidTVServiceNameKey = "androidTVServiceName"
-    private static let savedGTVDevicesKey = "savedGTVDevices"
-
-    private static var bgImageURL: URL {
-        URL.documentsDirectory.appendingPathComponent("bgImage.jpg")
-    }
-
-    static func defaultPreset(for provider: String) -> [Color] {
-        switch provider {
-        case "Android TV":
-            return [
-                Color(hex: "000000") ?? .black,
-                Color(hex: "4285F4") ?? .blue,
-                Color(hex: "34A853") ?? .green,
-                Color(hex: "EA4335") ?? .red,
-                Color(hex: "FBBC04") ?? .yellow,
-            ]
-        default:
-            return [
-                Color(hex: "000000") ?? .black,
-                Color(hex: "FF6A00") ?? .orange,
-            ]
-        }
-    }
-
-    init() {
-        decoderIP = UserDefaults.standard.string(forKey: Self.decoderIPKey) ?? ""
-        hasCustomizedColors = UserDefaults.standard.object(forKey: Self.hasCustomizedColorsKey) as? Bool ?? false
-        if let hexes = UserDefaults.standard.array(forKey: Self.bgColorsKey) as? [String], !hexes.isEmpty {
-            bgColors = hexes.compactMap { Color(hex: $0) }
-        } else {
-            let c1 = Color(hex: UserDefaults.standard.string(forKey: "bgColor1") ?? "") ?? Color(hex: "000000") ?? .black
-            let c2 = Color(hex: UserDefaults.standard.string(forKey: "bgColor2") ?? "") ?? Color(hex: "FF6A00") ?? .orange
-            bgColors = [c1, c2]
-        }
-        bgImageData = try? Data(contentsOf: Self.bgImageURL)
-        bgShowPhoto = UserDefaults.standard.object(forKey: Self.bgShowPhotoKey) as? Bool ?? false
-        bgWeight = UserDefaults.standard.object(forKey: Self.bgWeightKey) as? Double ?? 0.5
-        bgSpread = UserDefaults.standard.object(forKey: Self.bgSpreadKey) as? Double ?? 0.5
-        let majorVersion = Int(UIDevice.current.systemVersion.split(separator: ".").first ?? "") ?? 0
-        bgTint = UserDefaults.standard.object(forKey: Self.bgTintKey) as? Double ?? (majorVersion >= 27 ? 0.5 : 0)
-        bgButtonShape = UserDefaults.standard.string(forKey: Self.bgButtonShapeKey)
-            .flatMap(ButtonShape.init(rawValue:)) ?? .squircle
-        bgDisableStretch = UserDefaults.standard.object(forKey: Self.bgDisableStretchKey) as? Bool ?? false
-        selectedProvider = UserDefaults.standard.string(forKey: Self.selectedProviderKey) ?? "Orange"
-        androidTVIP = UserDefaults.standard.string(forKey: Self.androidTVIPKey) ?? ""
-        androidTVPairedDevice = UserDefaults.standard.string(forKey: Self.androidTVPairedDeviceKey) ?? ""
-        androidTVServiceName = UserDefaults.standard.string(forKey: Self.androidTVServiceNameKey) ?? ""
-
-        savedGTVDevices = Self.loadGTVDevices()
-        if savedGTVDevices.isEmpty && !androidTVPairedDevice.isEmpty {
-            savedGTVDevices = [
-                SavedGTVDevice(
-                    id: UUID(),
-                    name: androidTVPairedDevice,
-                    ip: androidTVIP,
-                    serviceName: androidTVServiceName
-                )
-            ]
-        }
-
-        if decoderIP.isEmpty && androidTVIP.isEmpty {
-            scanLocalNetwork()
-        }
-    }
-    
-    private static func loadGTVDevices() -> [SavedGTVDevice] {
-        guard let data = UserDefaults.standard.data(forKey: Self.savedGTVDevicesKey),
-              let devices = try? JSONDecoder().decode([SavedGTVDevice].self, from: data) else {
-            return []
-        }
-        return devices
-    }
-
-    var canSend: Bool {
-        if selectedProvider == "Android TV" {
-            return !androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !androidTVPairedDevice.isEmpty
-        }
-        return !decoderIP.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    var currentIP: String {
-        selectedProvider == "Android TV" ? androidTVIP : decoderIP
-    }
-
-    func send(_ key: OrangeKey) {
-        guard canSend else {
-            status = .needsAddress
-            return
-        }
-
-        status = .sending
-
-        if selectedProvider == "Android TV" {
-            let ip = androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            Task {
-                do {
-                    if androidTVRemoteClient == nil {
-                        androidTVRemoteClient = makeAndroidTVRemoteClient(ip: ip)
-                    }
-                    try await androidTVRemoteClient?.send(key)
-                    await MainActor.run { status = .connected }
-                } catch {
-                    await MainActor.run { status = .failed }
-                }
-            }
-        } else {
-            let ip = decoderIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            Task {
-                do {
-                    try await OrangeRemoteClient(decoderIP: ip).send(key)
-                    await MainActor.run { status = .connected }
-                } catch {
-                    await MainActor.run { status = .failed }
-                }
-            }
-        }
-    }
-
-    func send(_ key: OrangeKey, direction: Int32) {
-        guard canSend else {
-            status = .needsAddress
-            return
-        }
-
-        status = .sending
-
-        if selectedProvider == "Android TV" {
-            let ip = androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            Task {
-                do {
-                    if androidTVRemoteClient == nil {
-                        androidTVRemoteClient = makeAndroidTVRemoteClient(ip: ip)
-                    }
-                    try await androidTVRemoteClient?.send(key, direction: direction)
-                    await MainActor.run { status = .connected }
-                } catch {
-                    await MainActor.run { status = .failed }
-                }
-            }
-        } else {
-            send(key)
-        }
-    }
-
-    func sendText(_ text: String) {
-        guard canSend, selectedProvider == "Android TV" else {
-            status = .needsAddress
-            return
-        }
-        if text == "\u{8}" {
-            let ip = androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            sendTextTask?.cancel()
-            sendTextTask = Task {
-                do {
-                    if androidTVRemoteClient == nil {
-                        androidTVRemoteClient = makeAndroidTVRemoteClient(ip: ip)
-                    }
-                    try await androidTVRemoteClient?.sendKeyCode(67, direction: 3)
-                    await MainActor.run { status = .connected }
-                } catch {
-                    await MainActor.run { status = .failed }
-                }
-            }
-            return
-        }
-        if text == "\u{1B}" {
-            return
-        }
-        sendTextTask?.cancel()
-        sendTextTask = Task { [weak self] in
-            guard let self else { return }
-            let ip = androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            do {
-                if androidTVRemoteClient == nil {
-                    androidTVRemoteClient = makeAndroidTVRemoteClient(ip: ip)
-                }
-                try await androidTVRemoteClient?.sendText(text)
-                await MainActor.run { status = .connected }
-            } catch {
-                await MainActor.run { status = .failed }
-            }
-        }
-    }
-
-    func testConnection() {
-        guard canSend else {
-            status = .needsAddress
-            return
-        }
-
-        status = .testing
-
-        if selectedProvider == "Android TV" {
-            let ip = androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            Task {
-                let client = makeAndroidTVRemoteClient(ip: ip)
-                let ok = await client.ping()
-                if ok {
-                    androidTVRemoteClient?.disconnect()
-                    androidTVRemoteClient = client
-                }
-                await MainActor.run { status = ok ? .connected : .failed }
-            }
-        } else {
-            let ip = decoderIP.trimmingCharacters(in: .whitespacesAndNewlines)
-            Task {
-                let ok = await OrangeRemoteClient(decoderIP: ip).ping()
-                await MainActor.run { status = ok ? .connected : .failed }
-            }
-        }
-    }
-
-    private func makeAndroidTVRemoteClient(ip: String) -> AndroidTVRemoteClient {
-        let client = AndroidTVRemoteClient(host: ip, serviceName: androidTVServiceName)
-        client.onTextInputRequest = { [weak self] in
-            Task { @MainActor in
-                guard let self, Date().timeIntervalSince(self.lastKeyboardDismissTime ?? .distantPast) > 0.5 else { return }
-                self.isKeyboardVisible = true
-            }
-        }
-        return client
-    }
-
-    func scanLocalNetwork() {
-        cancelScan()
-        guard !isScanning else { return }
-
-        isScanning = true
-        foundDecoders = []
-        discoveredAndroidTV = []
-        shouldAutoRetry = false
-        status = .scanning
-
-        let generation = scanGeneration + 1
-        scanGeneration = generation
-
-        scanTask = Task { [weak self] in
-            defer {
-                Task { @MainActor in
-                    guard let self, self.scanGeneration == generation else { return }
-                    self.isScanning = false
-                    self.scanTask = nil
-                }
-            }
-            guard let self else { return }
-
-            if selectedProvider == "Android TV" {
-                let devices = await discoverAndroidTV()
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    discoveredAndroidTV = devices
-                    if let first = devices.first {
-                        androidTVIP = first.ip
-                        status = androidTVPairedDevice.isEmpty ? .needsPairing : .connected
-                    } else {
-                        status = .notFound
-                    }
-                }
-            } else {
-                let base = await localIPv4Base() ?? "192.168.1"
-                let hits = await scanOrange(base: base)
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    foundDecoders = hits
-                    if hits.isEmpty {
-                        status = .notFound
-                        shouldAutoRetry = true
-                    } else {
-                        status = .idle
-                    }
-                }
-            }
-        }
-    }
-
-    private func cancelScan() {
-        scanTask?.cancel()
-        scanTask = nil
-        isScanning = false
-        if status == .scanning {
-            status = .idle
-        }
-    }
-
-    func beginAndroidTVPairing(_ device: DiscoveredAndroidTVDevice) {
-        cancelPairing()
-        androidTVIP = device.ip
-        pendingAndroidTVPairing = device
-        pairingMessage = String(localized: "Connexion à \(device.name)…")
-        status = .pairing
-
-        Task {
-            do {
-                let session = try await AndroidTVPairingSession.start(
-                    device: device,
-                    clientServiceName: "RemoteGlass",
-                    clientName: "RemoteGlass"
-                )
-                await MainActor.run {
-                    pairingSession = session
-                    pairingMessage = String(localized: "Saisis le code affiché sur \(device.name).")
-                    status = .pairing
-                }
-            } catch {
-                await MainActor.run {
-                    pairingMessage = String(localized: "Impossible de lancer l'appairage : \(error.localizedDescription)")
-                    status = .failed
-                }
-            }
-        }
-    }
-
-    func finishAndroidTVPairing(pin: String) {
-        guard let session = pairingSession,
-              let device = pendingAndroidTVPairing else {
-            pairingMessage = String(localized: "Relance l'appairage.")
-            status = .failed
-            return
-        }
-
-        pairingMessage = String(localized: "Validation du code…")
-        status = .pairing
-
-        Task {
-            do {
-                try await session.finish(pin: pin)
-                await MainActor.run {
-                    androidTVIP = device.ip
-                    androidTVPairedDevice = device.name
-                    androidTVServiceName = device.serviceName
-                    let saved = SavedGTVDevice(id: UUID(), name: device.name, ip: device.ip, serviceName: device.serviceName)
-                    savedGTVDevices.removeAll { $0.ip == device.ip }
-                    savedGTVDevices.append(saved)
-                    discoveredAndroidTV = []
-                    pairingSession = nil
-                    pendingAndroidTVPairing = nil
-                    pairingMessage = nil
-                    status = .connected
-                }
-            } catch {
-                await MainActor.run {
-                    pairingMessage = String(localized: "Code refusé ou appairage expiré : \(error.localizedDescription)")
-                    status = .failed
-                }
-            }
-        }
-    }
-
-    func cancelPairing() {
-        pairingSession?.cancel()
-        pairingSession = nil
-        pendingAndroidTVPairing = nil
-        pairingMessage = nil
-        if status == .pairing {
-            status = .idle
-        }
-    }
-
-    func connectToSavedGTVDevice(_ device: SavedGTVDevice) {
-        androidTVIP = device.ip
-        androidTVPairedDevice = device.name
-        androidTVServiceName = device.serviceName
-        status = .testing
-        testConnection()
-    }
-
-    func onActive() {
-        if shouldAutoRetry || isScanning {
-            shouldAutoRetry = false
-            scanLocalNetwork()
-        }
-    }
-
-    private func discoverAndroidTV() async -> [DiscoveredAndroidTVDevice] {
-        await triggerLocalNetworkPermission()
-        return await browseAndroidTVMDNS()
-    }
-
-    private nonisolated func triggerLocalNetworkPermission() async {
-        // Force la permission réseau local (même si aucun appareil n'est trouvé)
-        let probes = ["192.168.1.1", "192.168.0.1", "10.0.0.1"]
-        for ip in probes {
-            guard let url = URL(string: "http://\(ip):80/") else { continue }
-            var req = URLRequest(url: url)
-            req.timeoutInterval = 0.5
-            _ = try? await URLSession.shared.data(for: req)
-        }
-    }
-
-    private var sanitizedIP: String {
-        decoderIP.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private nonisolated func scanOrange(base: String) async -> [String] {
-        await withTaskGroup(of: String?.self) { group in
-            for host in 1...254 {
-                let ip = "\(base).\(host)"
-                group.addTask {
-                    await Self.isOrangeDecoderReachable(ip: ip) ? ip : nil
-                }
-            }
-
-            var results: [String] = []
-            for await result in group {
-                if let result {
-                    results.append(result)
-                }
-            }
-            return results.sorted()
-        }
-    }
-
-    private nonisolated static func isOrangeDecoderReachable(ip: String) async -> Bool {
-        guard let url = URL(string: "http://\(ip):8080/remoteControl/cmd?operation=01&key=116&mode=2") else {
-            return false
-        }
-
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 0.7
-
-        do {
-            let (_, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse else { return false }
-            return (200..<500).contains(http.statusCode)
-        } catch {
-            return false
-        }
-    }
+struct OrangeDecoder: Identifiable, Equatable, Sendable {
+    let ip: String
+    let name: String?
+    let mac: String?
+    var id: String { ip }
 }
 
 enum ConnectionStatus: Equatable {
@@ -597,7 +85,7 @@ enum ConnectionStatus: Equatable {
 
 // MARK: - Android TV Support (Google TV Remote Protocol)
 
-struct DiscoveredAndroidTVDevice: Identifiable, Equatable {
+struct DiscoveredAndroidTVDevice: Identifiable, Equatable, Sendable {
     let id = UUID()
     let name: String
     let ip: String
@@ -725,7 +213,7 @@ private struct ProtoReader {
 
 // MARK: - mDNS discovery
 
-private func browseAndroidTVMDNS() async -> [DiscoveredAndroidTVDevice] {
+func browseAndroidTVMDNS() async -> [DiscoveredAndroidTVDevice] {
     let types = ["_androidtvremote2._tcp.", "_androidtvremote._tcp.", "_androidtv-remote._tcp."]
     var seen: [DiscoveredAndroidTVDevice] = []
 
@@ -745,7 +233,7 @@ private func browseAndroidTVMDNS() async -> [DiscoveredAndroidTVDevice] {
     }
 }
 
-private final class BonjourAndroidTVBrowser: NSObject, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
+final class BonjourAndroidTVBrowser: NSObject, NetServiceBrowserDelegate, NetServiceDelegate, @unchecked Sendable {
     private let type: String
     private let domain = "local."
     private let lock = NSLock()
@@ -819,7 +307,7 @@ private final class BonjourAndroidTVBrowser: NSObject, NetServiceBrowserDelegate
         continuation?.resume(returning: result)
     }
 
-    private static func preferredIPAddress(from addresses: [Data]) -> String? {
+    static func preferredIPAddress(from addresses: [Data]) -> String? {
         let candidates = addresses.compactMap(Self.ipAddress)
         return candidates.first(where: { !$0.contains(":") }) ?? candidates.first
     }
@@ -938,7 +426,7 @@ private enum AndroidTVProtocolError: LocalizedError {
     }
 }
 
-private final class AndroidTVRemoteClient: @unchecked Sendable {
+final class AndroidTVRemoteClient: RemoteController, @unchecked Sendable {
     let host: String
     let serviceName: String
     private var _connection: AndroidTVConnection?
@@ -967,13 +455,9 @@ private final class AndroidTVRemoteClient: @unchecked Sendable {
         }
     }
 
+    /// Ouvre (ou réutilise) la connexion sans envoyer de touche : un test ne doit rien déclencher sur la TV.
     func ping() async -> Bool {
-        do {
-            try await send(.menu)
-            return true
-        } catch {
-            return false
-        }
+        (try? await ensureConnected()) != nil
     }
 
     private func ensureConnected() async throws -> AndroidTVConnection {
@@ -1045,6 +529,15 @@ private final class AndroidTVRemoteClient: @unchecked Sendable {
     }
 
     func sendText(_ text: String) async throws {
+        switch text {
+        case "\u{8}":
+            try await sendKeyCode(67, direction: 3)
+            return
+        case "\u{1B}":
+            return
+        default:
+            break
+        }
         let conn = try await ensureConnected()
         try await conn.sendFrame(AndroidTVRemoteMessage.setText(text))
     }
@@ -1067,7 +560,7 @@ private final class AndroidTVRemoteClient: @unchecked Sendable {
     }
 }
 
-private final class AndroidTVPairingSession: @unchecked Sendable {
+final class AndroidTVPairingSession: @unchecked Sendable {
     private let connection: AndroidTVConnection
     private let peerCertificate: Data
     private let clientCertificate: Data

@@ -11,6 +11,13 @@
 		0A0000010000000000000002 /* OrangeKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000012 /* OrangeKey.swift */; };
 		0A0000010000000000000003 /* OrangeRemoteClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000013 /* OrangeRemoteClient.swift */; };
 		0A0000010000000000000004 /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000014 /* RemoteView.swift */; };
+		0A0000010000000000000100 /* Devices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000110 /* Devices.swift */; };
+		0A0000010000000000000101 /* TVClients.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000111 /* TVClients.swift */; };
+		0A0000010000000000000102 /* NetworkScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000112 /* NetworkScanner.swift */; };
+		0A0000010000000000000103 /* DeviceHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000113 /* DeviceHub.swift */; };
+		0A0000010000000000000104 /* AppViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000114 /* AppViews.swift */; };
+		0A00000100000000000001A1 /* FeedbackAndDevices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A00000100000000000001A2 /* FeedbackAndDevices.swift */; };
+		0A0000010000000000000105 /* SettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000115 /* SettingsViews.swift */; };
 		0A0000010000000000000021 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000024 /* Localizable.xcstrings */; };
 		0A0000010000000000000023 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 0A0000010000000000000022 /* InfoPlist.xcstrings */; };
 		6244E6FF2FD4A75E0089C5DE /* RemoteGlass.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6244E6FE2FD4A75D0089C5DE /* RemoteGlass.icon */; };
@@ -25,6 +32,13 @@
 		0A0000010000000000000012 /* OrangeKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrangeKey.swift; sourceTree = "<group>"; };
 		0A0000010000000000000013 /* OrangeRemoteClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrangeRemoteClient.swift; sourceTree = "<group>"; };
 		0A0000010000000000000014 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
+		0A0000010000000000000110 /* Devices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Devices.swift; sourceTree = "<group>"; };
+		0A0000010000000000000111 /* TVClients.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TVClients.swift; sourceTree = "<group>"; };
+		0A0000010000000000000112 /* NetworkScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanner.swift; sourceTree = "<group>"; };
+		0A0000010000000000000113 /* DeviceHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceHub.swift; sourceTree = "<group>"; };
+		0A0000010000000000000114 /* AppViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViews.swift; sourceTree = "<group>"; };
+		0A00000100000000000001A2 /* FeedbackAndDevices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackAndDevices.swift; sourceTree = "<group>"; };
+		0A0000010000000000000115 /* SettingsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViews.swift; sourceTree = "<group>"; };
 		0A0000010000000000000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0A0000010000000000000022 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		0A0000010000000000000024 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -62,6 +76,13 @@
 				0A0000010000000000000012 /* OrangeKey.swift */,
 				0A0000010000000000000013 /* OrangeRemoteClient.swift */,
 				0A0000010000000000000014 /* RemoteView.swift */,
+				0A0000010000000000000110 /* Devices.swift */,
+				0A0000010000000000000111 /* TVClients.swift */,
+				0A0000010000000000000112 /* NetworkScanner.swift */,
+				0A0000010000000000000113 /* DeviceHub.swift */,
+				0A0000010000000000000114 /* AppViews.swift */,
+				0A00000100000000000001A2 /* FeedbackAndDevices.swift */,
+				0A0000010000000000000115 /* SettingsViews.swift */,
 				0A0000010000000000000015 /* Info.plist */,
 				6244E7112FD4A75E0089C5DE /* Assets/orangedecoder.png */,
 				6244E7132FD4A75E0089C5DE /* Assets/playerpop.png */,
@@ -161,6 +182,13 @@
 				0A0000010000000000000002 /* OrangeKey.swift in Sources */,
 				0A0000010000000000000003 /* OrangeRemoteClient.swift in Sources */,
 				0A0000010000000000000004 /* RemoteView.swift in Sources */,
+				0A0000010000000000000100 /* Devices.swift in Sources */,
+				0A0000010000000000000101 /* TVClients.swift in Sources */,
+				0A0000010000000000000102 /* NetworkScanner.swift in Sources */,
+				0A0000010000000000000103 /* DeviceHub.swift in Sources */,
+				0A0000010000000000000104 /* AppViews.swift in Sources */,
+				0A00000100000000000001A1 /* FeedbackAndDevices.swift in Sources */,
+				0A0000010000000000000105 /* SettingsViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,12 +334,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fares.remoteglass.5Z8VG8C6J3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -333,11 +361,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.fares.remoteglass.5Z8VG8C6J3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

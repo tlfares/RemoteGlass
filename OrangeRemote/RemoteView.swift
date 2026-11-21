@@ -1,753 +1,137 @@
 import SwiftUI
 import UIKit
 
-struct RemoteView: View {
-    @StateObject private var model = RemoteViewModel()
-    @State private var selectedTab: AppTab = .remote
-    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+struct RemoteLayoutMetrics {
+    let horizontalPadding: CGFloat
+    let verticalPadding: CGFloat
+    let sectionSpacing: CGFloat
+    let controlSpacing: CGFloat
+    let buttonSize: CGFloat
+    let touchPadHeight: CGFloat
+    let usesCompactHeader: Bool
+    let pinControlsToBottom: Bool
+    /// Clavier ouvert : la rangée du bas est masquée pour laisser la place au trackpad.
+    let hidesBottomRow: Bool
+    /// Zone large et basse (Duo déplié en portrait, iPad en paysage) : les blocs passent côte à côte.
+    let isWide: Bool
+    /// Largeur maximale de la télécommande : grandit avec les boutons sur les grands écrans.
+    let maxContentWidth: CGFloat
 
-    private let keypad: [[OrangeKey]] = [
-        [.one, .two, .three],
-        [.four, .five, .six],
-        [.seven, .eight, .nine],
-        [.zero]
-    ]
+    init(containerSize: CGSize, isCleanMode: Bool, isKeyboardVisible: Bool, hasPowerRow: Bool = false, splitsPowerRowWhenWide: Bool = false) {
+        let width = max(containerSize.width, 1)
+        let height = max(containerSize.height, 1)
 
-    var body: some View {
-        ZStack {
-            TabView(selection: $selectedTab) {
-                RemoteTab(
-                    status: model.status,
-                    provider: model.selectedProvider,
-                    keypad: keypad,
-                    send: model.send,
-                    sendDirection: model.send(_:direction:),
-                    sendText: model.sendText,
-                    bgColors: model.bgColors,
-                    bgImageData: model.bgImageData,
-                    bgShowPhoto: model.bgShowPhoto,
-                    bgWeight: model.bgWeight,
-                    bgSpread: model.bgSpread,
-                    bgTint: model.bgTint,
-                    bgButtonShape: model.bgButtonShape,
-                    bgDisableStretch: model.bgDisableStretch,
-                    selectedTab: $selectedTab,
-                    isKeyboardVisible: $model.isKeyboardVisible
-                )
-                .tabItem {
-                    Label(AppTab.remote.label, systemImage: AppTab.remote.systemName)
-                }
-                .tag(AppTab.remote)
+        isWide = width >= 560 && width >= height * 1.15
+        horizontalPadding = min(isWide ? 40 : 22, max(12, width * 0.048))
+        verticalPadding = height < 600 ? 4 : 10
+        usesCompactHeader = height < 640 || isKeyboardVisible
+        sectionSpacing = usesCompactHeader ? 4 : 12
+        controlSpacing = height < 600 || isKeyboardVisible ? 6 : min(18, max(10, height * 0.018))
+        // Keep the surface attached to the keyboard while its safe-area animation
+        // is still settling. The height fallback prevents a second jump when the
+        // binding flips before GeometryReader receives the expanded height.
+        pinControlsToBottom = isKeyboardVisible || (isCleanMode && height < 520)
+        let contentWidth = max(1, width - horizontalPadding * 2)
+        // Sur iPhone les boutons plafonnent à 62 pt ; les grands écrans en profitent jusqu'à 88 pt.
+        let maximumButton = min(88, max(62, min(width, height) * 0.09))
+        // Hauteur réelle de l'en-tête (icône + nom + état) ; une marge évite de coller à la tab bar.
+        let headerHeight: CGFloat = usesCompactHeader ? 30 : 88
+        let bottomBreathingRoom: CGFloat = isKeyboardVisible ? 0 : 12
+        let reservedHeight = verticalPadding * 2 + (isWide ? 0 : headerHeight + sectionSpacing) + bottomBreathingRoom
+        let availableHeight = height - reservedHeight
 
-                SettingsTab(
-                    decoderIP: $model.decoderIP,
-                    androidTVIP: $model.androidTVIP,
-                    status: model.status,
-                    isScanning: model.isScanning,
-                    foundDecoders: model.foundDecoders,
-                    discoveredAndroidTV: model.discoveredAndroidTV,
-                    pendingAndroidTVPairing: model.pendingAndroidTVPairing,
-                    pairingMessage: model.pairingMessage,
-                    selectedProvider: $model.selectedProvider,
-                    scanAction: model.scanLocalNetwork,
-                    pairAction: model.beginAndroidTVPairing,
-                    finishPairingAction: model.finishAndroidTVPairing,
-                    cancelPairingAction: model.cancelPairing,
-                    confirmAction: {
-                        if model.selectedProvider == "Android TV" {
-                            model.discoveredAndroidTV = []
-                            if !model.androidTVIP.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                model.testConnection()
-                            }
-                        } else {
-                            model.foundDecoders = []
-                            if !model.decoderIP.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                model.testConnection()
-                            }
-                        }
-                    },
-                    onSceneActive: { model.onActive() },
-                    savedGTVDevices: model.savedGTVDevices,
-                    connectToSavedAction: { device in
-                        model.connectToSavedGTVDevice(device)
-                    },
-                    bgColors: $model.bgColors,
-                    bgImageData: $model.bgImageData,
-                    showPhoto: $model.bgShowPhoto,
-                    bgWeight: $model.bgWeight,
-                    bgSpread: $model.bgSpread,
-                    bgTint: $model.bgTint,
-                    bgButtonShape: $model.bgButtonShape,
-                    disableStretch: $model.bgDisableStretch,
-                    selectedTab: $selectedTab,
-                    hasCustomizedColors: $model.hasCustomizedColors
-                )
-                .tabItem {
-                    Label(AppTab.settings.label, systemImage: AppTab.settings.systemName)
-                }
-                .tag(AppTab.settings)
-            }
-            .tint(model.bgColors.count > 2 ? .blue : .orange)
-        }
-        .sheet(isPresented: .init(
-            get: { !hasSeenOnboarding },
-            set: { if !$0 { hasSeenOnboarding = true } }
-        )) {
-            OnboardingView(
-                provider: $model.selectedProvider,
-                accentColor: model.bgColors.count > 2 ? .blue : .orange,
-                onConfirm: {
-                    hasSeenOnboarding = true
-                    selectedTab = .settings
-                }
-            )
-            .preferredColorScheme(.dark)
-            .presentationDetents([.large])
-            .presentationCornerRadius(40)
-            .presentationBackground(.ultraThinMaterial)
-            .interactiveDismissDisabled()
-        }
-    }
-}
+        hidesBottomRow = isCleanMode && isKeyboardVisible
 
-private enum AppTab: String, CaseIterable, Identifiable {
-    case remote = "Remote"
-    case settings = "Settings"
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .remote: String(localized: "Remote")
-        case .settings: String(localized: "Settings")
-        }
-    }
-
-    var systemName: String {
-        switch self {
-        case .remote: "dot.radiowaves.left.and.right"
-        case .settings: "gearshape"
-        }
-    }
-
-}
-
-private struct HeaderView: View {
-    var status: ConnectionStatus
-    var provider: String = "Orange"
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "tv")
-                .font(.system(size: 32, weight: .semibold))
-                .symbolRenderingMode(.hierarchical)
-            Text(status.title(for: provider))
-                .font(.headline)
-                .contentTransition(.numericText())
-        }
-        .frame(maxWidth: .infinity)
-        .foregroundStyle(.white)
-    }
-}
-
-private struct RemoteTab: View {
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var refreshToken = 0
-    @State private var isEpureMode = false
-    var status: ConnectionStatus
-    var provider: String
-    var keypad: [[OrangeKey]]
-    var send: (OrangeKey) -> Void
-    var sendDirection: (OrangeKey, Int32) -> Void
-    var sendText: (String) -> Void
-    var bgColors: [Color]
-    var bgImageData: Data?
-    var bgShowPhoto: Bool
-    var bgWeight: Double
-    var bgSpread: Double
-    var bgTint: Double
-    var bgButtonShape: ButtonShape
-    var bgDisableStretch: Bool
-    @Binding var selectedTab: AppTab
-    @Binding var isKeyboardVisible: Bool
-
-    private var isCompact: Bool {
-        UIScreen.main.bounds.height <= 700
-    }
-
-    var body: some View {
-        ZStack {
-            BackgroundView(colors: bgColors, imageData: bgImageData, showImage: bgShowPhoto, weight: bgWeight, spread: bgSpread)
-
-            GeometryReader { proxy in
-                let widthSize = (proxy.size.width - 78) / 5
-                let heightSize = (proxy.size.height - 114) / 10.8
-                let buttonSize = min(62, max(isCompact && (isKeyboardVisible || !isEpureMode) ? 42 : 48, min(widthSize, heightSize)))
-
-                VStack(spacing: isCompact ? 0 : 12) {
-                    if isCompact {
-                        Color.clear.frame(height: 6)
-
-                        HeaderView(status: status, provider: provider)
-                            .offset(y: -10 + (selectedTab == .remote ? 0 : -6))
-                            .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
-
-                        if isEpureMode {
-                            CleanControlSurface(
-                                buttonSize: buttonSize,
-                                send: send,
-                                sendDirection: sendDirection,
-                                sendText: sendText,
-                                toggleClassic: { withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) { isEpureMode = false } },
-                                provider: provider,
-                                isKeyboardVisible: $isKeyboardVisible,
-                                isCompact: true
-                            )
-                            .transition(.opacity.combined(with: .scale(scale: 0.93)))
-                            .id(refreshToken)
-                        } else {
-                            ControlSurface(
-                                keypad: keypad,
-                                buttonSize: buttonSize,
-                                send: send,
-                                sendDirection: sendDirection,
-                                provider: provider,
-                                toggleClean: { withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) { isEpureMode = true } },
-                                isCompact: true
-                            )
-                            .transition(.opacity.combined(with: .scale(scale: 0.93)))
-                            .id(refreshToken)
-                        }
-                    } else {
-                        Spacer(minLength: 0)
-
-                        HeaderView(status: status, provider: provider)
-                            .offset(y: -10 + (selectedTab == .remote ? 0 : -6))
-                            .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
-
-                        if isEpureMode {
-                            CleanControlSurface(
-                                buttonSize: buttonSize,
-                                send: send,
-                                sendDirection: sendDirection,
-                                sendText: sendText,
-                                toggleClassic: { withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) { isEpureMode = false } },
-                                provider: provider,
-                                isKeyboardVisible: $isKeyboardVisible
-                            )
-                            .padding(.top, 20)
-                            .transition(.opacity.combined(with: .scale(scale: 0.93)))
-                            .id(refreshToken)
-                        } else {
-                            ControlSurface(
-                                keypad: keypad,
-                                buttonSize: buttonSize,
-                                send: send,
-                                sendDirection: sendDirection,
-                                provider: provider,
-                                toggleClean: { withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) { isEpureMode = true } }
-                            )
-                            .transition(.opacity.combined(with: .scale(scale: 0.93)))
-                            .id(refreshToken)
-                        }
-
-                        Spacer(minLength: 0)
-                    }
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, isCompact ? 4 : 10)
-                .padding(.bottom, isCompact ? 2 : 4)
-                .offset(y: isCompact ? 0 : 6)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-        .environment(\.glassTint, bgTint)
-        .environment(\.buttonShape, bgButtonShape)
-        .environment(\.disableStretch, bgDisableStretch)
-        .onAppear {
-            isEpureMode = provider == "Android TV"
-        }
-        .onChange(of: provider) { _, newProvider in
-            withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.85)) {
-                isEpureMode = newProvider == "Android TV"
-            }
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
-                refreshToken &+= 1
-            }
-        }
-    }
-}
-
-private struct SettingsTab: View {
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var refreshToken = 0
-    @Binding var decoderIP: String
-    @Binding var androidTVIP: String
-    var status: ConnectionStatus
-    var isScanning: Bool
-    var foundDecoders: [String]
-    var discoveredAndroidTV: [DiscoveredAndroidTVDevice]
-    var pendingAndroidTVPairing: DiscoveredAndroidTVDevice?
-    var pairingMessage: String?
-    @Binding var selectedProvider: String
-    var scanAction: () -> Void
-    var pairAction: (DiscoveredAndroidTVDevice) -> Void
-    var finishPairingAction: (String) -> Void
-    var cancelPairingAction: () -> Void
-    var confirmAction: () -> Void
-    var onSceneActive: () -> Void
-    var savedGTVDevices: [SavedGTVDevice]
-    var connectToSavedAction: (SavedGTVDevice) -> Void
-    @Binding var bgColors: [Color]
-    @Binding var bgImageData: Data?
-    @Binding var showPhoto: Bool
-    @Binding var bgWeight: Double
-    @Binding var bgSpread: Double
-    @Binding var bgTint: Double
-    @Binding var bgButtonShape: ButtonShape
-    @Binding var disableStretch: Bool
-    @Binding var selectedTab: AppTab
-    @Binding var hasCustomizedColors: Bool
-
-    @ViewBuilder
-    private var savedDevicesSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Appareils enregistrés")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.8))
-
-            ForEach(savedGTVDevices) { device in
-                Button {
-                    connectToSavedAction(device)
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "tv")
-                            .font(.title3)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(device.name)
-                                .font(.body.weight(.medium))
-                            Text(device.ip)
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.5))
-                        }
-                        Spacer()
-                        if device.ip == androidTVIP {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 50)
-                    .padding(.horizontal, 14)
-                }
-                .buttonStyle(RemoteGlassButtonStyle())
-                .environment(\.buttonShape, .squircle)
-                .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
-            }
-        }
-        .animation(.spring(response: 0.55, dampingFraction: 0.75), value: savedGTVDevices)
-    }
-
-    var body: some View {
-        ZStack {
-            BackgroundView(colors: bgColors, imageData: bgImageData, showImage: showPhoto, weight: bgWeight, spread: bgSpread)
-
-            ScrollView {
-                VStack(spacing: 20) {
-                    Color.clear
-                        .frame(height: 40)
-                        .accessibilityHidden(true)
-
-                    HeaderView(status: status, provider: selectedProvider)
-                        .offset(y: selectedTab == .settings ? 0 : -6)
-                        .animation(.interactiveSpring(response: 0.4, dampingFraction: 0.85), value: selectedTab)
-
-                    AddressPanel(
-                        decoderIP: $decoderIP,
-                        androidTVIP: $androidTVIP,
-                        isScanning: isScanning,
-                        foundDecoders: foundDecoders,
-                        discoveredAndroidTV: discoveredAndroidTV,
-                        pendingAndroidTVPairing: pendingAndroidTVPairing,
-                        pairingMessage: pairingMessage,
-                        selectedProvider: selectedProvider,
-                        scanAction: scanAction,
-                        pairAction: pairAction,
-                        finishPairingAction: finishPairingAction,
-                        cancelPairingAction: cancelPairingAction,
-                        confirmAction: confirmAction
-                    )
-                    .id(refreshToken)
-
-                    if selectedProvider == "Android TV" && !savedGTVDevices.isEmpty {
-                        savedDevicesSection
-                    }
-
-                    BackgroundSettingsPanel(
-                        colors: $bgColors,
-                        imageData: $bgImageData,
-                        showPhoto: $showPhoto,
-                        weight: $bgWeight,
-                        spread: $bgSpread,
-                        tint: $bgTint,
-                        buttonShape: $bgButtonShape,
-                        disableStretch: $disableStretch,
-                        selectedProvider: $selectedProvider,
-                        hasCustomizedColors: $hasCustomizedColors
-                    )
-
-                    VStack(spacing: 4) {
-                        HStack(spacing: 4) {
-                            Text("Credits :")
-                                .font(.caption2)
-                                .foregroundStyle(.white.opacity(0.5))
-                            Link("@rmxptfl", destination: URL(string: "https://twitter.com/rmxptfl")!)
-                                .font(.caption2)
-                                .underline()
-                                .foregroundStyle(.white.opacity(0.7))
-                        }
-                        Link("Check for updates", destination: URL(string: "https://github.com/tlfares/RemoteGlass/releases")!)
-                            .font(.caption2)
-                            .underline()
-                            .foregroundStyle(.white.opacity(0.5))
-                        Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.35))
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .padding(.horizontal, 22)
-                .padding(.vertical, 20)
-                .padding(.bottom, 60)
-                .frame(maxWidth: .infinity)
-            }
-            .scrollDismissesKeyboard(.immediately)
-        }
-        .environment(\.glassTint, bgTint)
-        .environment(\.disableStretch, disableStretch)
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
-                refreshToken &+= 1
-                onSceneActive()
-            }
-        }
-        .onChange(of: bgColors) { _, newColors in
-            let isGTV = newColors.count > 2
-            UIApplication.shared.setAlternateIconName(isGTV ? "RemoteGlassGTV" : nil)
-        }
-        .onAppear {
-            let isGTV = bgColors.count > 2
-            UIApplication.shared.setAlternateIconName(isGTV ? "RemoteGlassGTV" : nil)
-        }
-    }
-}
-
-private struct AddressPanel: View {
-    @Binding var decoderIP: String
-    @Binding var androidTVIP: String
-    @FocusState private var addressFocused: Bool
-    var isScanning: Bool
-    var foundDecoders: [String]
-    var discoveredAndroidTV: [DiscoveredAndroidTVDevice]
-    var pendingAndroidTVPairing: DiscoveredAndroidTVDevice?
-    var pairingMessage: String?
-    var selectedProvider: String
-    var scanAction: () -> Void
-    var pairAction: (DiscoveredAndroidTVDevice) -> Void
-    var finishPairingAction: (String) -> Void
-    var cancelPairingAction: () -> Void
-    var confirmAction: () -> Void
-    @State private var androidTVPin = ""
-
-    @State private var orangeState: OrangeIPState = .initial
-    @State private var gtvManualIPShown = false
-    @State private var gtvHasScanned = false
-
-    private enum OrangeIPState {
-        case initial
-        case results
-        case editing
-    }
-
-    private var currentIP: Binding<String> {
-        Binding(
-            get: { selectedProvider == "Android TV" ? androidTVIP : decoderIP },
-            set: { v in
-                if selectedProvider == "Android TV" { androidTVIP = v }
-                else { decoderIP = v }
-            }
-        )
-    }
-
-    var body: some View {
-        VStack(spacing: 12) {
-            if selectedProvider == "Android TV" {
-                androidTVBody
+        if isCleanMode {
+            // Rangées de boutons réellement affichées autour du trackpad
+            // (Android TV : power + rangée du haut + rangée du bas).
+            let buttonRows = CGFloat((hasPowerRow || (isWide && splitsPowerRowWhenWide) ? 3 : 2) - (hidesBottomRow ? 1 : 0))
+            if isWide {
+                // Boutons en colonne à gauche (4 de large), trackpad à droite sur toute la hauteur.
+                let widthLimitedButton = (contentWidth * 0.42 - 48) / 4
+                let heightLimitedButton = (availableHeight - headerHeight - controlSpacing * (buttonRows + 1)) / buttonRows
+                buttonSize = min(maximumButton, max(36, min(widthLimitedButton, heightLimitedButton)))
+                touchPadHeight = max(96, availableHeight - 8)
             } else {
-                orangeBody
-            }
-        }
-        .animation(.spring(response: 0.55, dampingFraction: 0.75), value: pendingAndroidTVPairing)
-    }
+                let widthLimitedButton = (contentWidth - 84) / 5
+                let desiredButton = min(maximumButton, max(40, widthLimitedButton))
+                let minimumTouchPadHeight: CGFloat = isKeyboardVisible ? 72 : 96
+                let heightLimitedButton = (availableHeight - minimumTouchPadHeight - controlSpacing * buttonRows) / buttonRows
+                buttonSize = min(desiredButton, max(36, heightLimitedButton))
 
-    @ViewBuilder
-    private var orangeBody: some View {
-        switch orangeState {
-        case .initial:
-            Button {
-                addressFocused = false
-                scanAction()
-                orangeState = .results
-            } label: {
-                Label(isScanning ? "Connexion" : "Détecter", systemImage: "dot.radiowaves.left.and.right")
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 52)
-                    .contentShape(Rectangle())
+                let availableTouchPadHeight = availableHeight - buttonSize * buttonRows - controlSpacing * buttonRows
+                let maximumTouchPadHeight = (height < 600 && !isKeyboardVisible ? 330 : 360) * buttonSize / 62
+                let outerBreathingRoom: CGFloat = isKeyboardVisible ? 0 : 10
+                touchPadHeight = min(
+                    maximumTouchPadHeight,
+                    max(minimumTouchPadHeight, availableTouchPadHeight - outerBreathingRoom * 2)
+                )
             }
-            .disabled(isScanning)
-            .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-            .environment(\.buttonShape, .squircle)
-
-        case .results:
-            Button {
-                addressFocused = false
-                scanAction()
-            } label: {
-                Label(isScanning ? "Recherche…" : "Détecter", systemImage: "dot.radiowaves.left.and.right")
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 52)
-                    .contentShape(Rectangle())
-            }
-            .disabled(isScanning)
-            .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-            .environment(\.buttonShape, .squircle)
-
-            ForEach(foundDecoders, id: \.self) { ip in
-                Button {
-                    decoderIP = ip
-                    addressFocused = false
-                    orangeState = .editing
-                } label: {
-                    Text(ip)
-                        .font(.body.weight(.medium))
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 50)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(RemoteGlassButtonStyle())
-                .environment(\.buttonShape, .squircle)
-            }
-
-            Button {
-                decoderIP = ""
-                orangeState = .editing
-            } label: {
-                Text("Saisir manuellement l'ip")
-                    .font(.body.weight(.medium))
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 50)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(RemoteGlassButtonStyle())
-            .environment(\.buttonShape, .squircle)
-
-        case .editing:
-            HStack(spacing: 10) {
-                Image(systemName: "network")
-                    .font(.headline)
-                TextField("IP du décodeur", text: currentIP)
-                    .keyboardType(.decimalPad)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($addressFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        addressFocused = false
-                    }
-            }
-            .padding(14)
-            .staticGlassPanel()
-
-            Button {
-                addressFocused = false
-                confirmAction()
-                orangeState = .initial
-            } label: {
-                Label("Confirmer", systemImage: "checkmark.circle")
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 52)
-            }
-            .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-            .environment(\.buttonShape, .squircle)
-        }
-    }
-
-    @ViewBuilder
-    private var androidTVBody: some View {
-        if gtvManualIPShown {
-            HStack(spacing: 10) {
-                Image(systemName: "tv")
-                    .font(.headline)
-                TextField("IP de la Google TV", text: currentIP)
-                    .keyboardType(.decimalPad)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($addressFocused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        addressFocused = false
-                    }
-            }
-            .padding(14)
-            .staticGlassPanel()
-
-            HStack(spacing: 10) {
-                Button {
-                    addressFocused = false
-                    confirmAction()
-                    gtvManualIPShown = false
-                    gtvHasScanned = false
-                } label: {
-                    Label("Confirmer", systemImage: "checkmark.circle")
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 52)
-                }
-
-                Button {
-                    addressFocused = false
-                    gtvManualIPShown = false
-                } label: {
-                    Label("Annuler", systemImage: "xmark.circle")
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 52)
-                }
-            }
-            .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-            .environment(\.buttonShape, .squircle)
+        } else if isWide {
+            // À gauche : power, VOL / croix / CH (≈ 4 boutons de haut, 5 de large).
+            // À droite : navigation + pavé numérique (5 boutons de haut, 3 de large).
+            let widthLimitedButton = (contentWidth - 160) / 8
+            let heightLimitedButton = (availableHeight - headerHeight - 50) / 5.3
+            buttonSize = min(maximumButton, max(36, min(widthLimitedButton, heightLimitedButton)))
+            touchPadHeight = 0
+        } else {
+            // Classic mode contains nine button-heights plus the labels and row gaps.
+            // Solving that layout against the live container prevents vertical overlap.
+            // The classic surface is five buttons wide once the D-pad and glass chrome
+            // paddings are included. Width, not a device name, is the reliable limit.
+            let widthLimitedButton = (contentWidth - 84) / 5
+            let fixedControlHeight: CGFloat = 60
+            let heightLimitedButton = (availableHeight - fixedControlHeight - controlSpacing * 3) / 9
+            buttonSize = min(maximumButton, max(36, min(widthLimitedButton, heightLimitedButton)))
+            touchPadHeight = 0
         }
 
-        if let pendingAndroidTVPairing {
-            VStack(spacing: 10) {
-                VStack(spacing: 4) {
-                    Text(pendingAndroidTVPairing.name)
-                        .font(.body.weight(.semibold))
-                    if let pairingMessage {
-                        Text(pairingMessage)
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.65))
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-
-                HStack(spacing: 10) {
-                    TextField("Code PIN", text: $androidTVPin)
-                        .keyboardType(.asciiCapable)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .focused($addressFocused)
-                        .padding(14)
-                        .staticGlassPanel()
-
-                    Button {
-                        addressFocused = false
-                        finishPairingAction(androidTVPin)
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .frame(width: 48, height: 48)
-                    }
-                    .disabled(androidTVPin.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-
-                    Button {
-                        androidTVPin = ""
-                        addressFocused = false
-                        cancelPairingAction()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .frame(width: 48, height: 48)
-                    }
-                    .buttonStyle(RemoteGlassButtonStyle())
-                }
-                .environment(\.buttonShape, .squircle)
-            }
-            .padding(12)
-            .staticGlassPanel()
-            .transition(.scale(scale: 0).combined(with: .opacity))
-        }
-
-        if !gtvManualIPShown && pendingAndroidTVPairing == nil {
-            Button {
-                addressFocused = false
-                androidTVPin = ""
-                gtvHasScanned = true
-                scanAction()
-            } label: {
-                Label(isScanning ? "Recherche…" : "Détecter", systemImage: "dot.radiowaves.left.and.right")
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 52)
-                    .contentShape(Rectangle())
-            }
-            .disabled(isScanning)
-            .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-            .environment(\.buttonShape, .squircle)
-
-            if !discoveredAndroidTV.isEmpty {
-                VStack(spacing: 8) {
-                    ForEach(discoveredAndroidTV) { device in
-                        Button {
-                            androidTVPin = ""
-                            addressFocused = false
-                            pairAction(device)
-                        } label: {
-                            VStack(spacing: 2) {
-                                Text(device.name)
-                                    .font(.body.weight(.medium))
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(minHeight: 50)
-                            .contentShape(Rectangle())
-                        }
-                    }
-                }
-                .buttonStyle(RemoteGlassButtonStyle())
-                .environment(\.buttonShape, .squircle)
-            }
-
-            if gtvHasScanned {
-                Button {
-                    gtvManualIPShown = true
-                } label: {
-                    Text("Saisir manuellement l'ip")
-                        .font(.body.weight(.medium))
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 50)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(RemoteGlassButtonStyle())
-                .environment(\.buttonShape, .squircle)
-            }
-        }
+        maxContentWidth = isWide ? min(contentWidth, buttonSize * 13 + 200) : 520 * max(1, buttonSize / 62)
     }
 }
 
-private struct ControlSurface: View {
+struct ControlSurface: View {
     var keypad: [[OrangeKey]]
     var buttonSize: CGFloat
+    var spacing: CGFloat
     var send: (OrangeKey) -> Void
     var sendDirection: (OrangeKey, Int32) -> Void
-    var provider: String
+    var kind: DeviceKind
+    var power: PowerActions
     var toggleClean: () -> Void
-    var isCompact = false
+    var isWide = false
+    var wideHeader: AnyView?
+    var sourceMenu: SourceMenu?
 
     var body: some View {
-        VStack(spacing: isCompact ? 8 : 14) {
+        if isWide {
+            HStack(alignment: .center, spacing: buttonSize * 0.8) {
+                VStack(spacing: spacing) {
+                    wideHeader
+                    mainControls
+                }
+                    .frame(maxWidth: buttonSize * 5 + 110)
+                VStack(spacing: spacing) { numberControls }
+                    .fixedSize()
+            }
+        } else {
+            VStack(spacing: spacing) {
+                mainControls
+                numberControls
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mainControls: some View {
             HStack(spacing: 10) {
-                RemoteButton(systemName: "power", size: buttonSize, tint: .orange) { send(.power) }
+                PowerCluster(size: buttonSize, power: power)
                 Spacer(minLength: 8)
-                RemoteButton(systemName: "record.circle", size: buttonSize) { send(.record) }
+                if !kind.isTelevision {
+                    RemoteButton(systemName: "record.circle", size: buttonSize) { send(.record) }
+                } else if kind.supportsInput {
+                    SourceButton(size: buttonSize, menu: sourceMenu) { send(.input) }
+                }
             }
 
             HStack(alignment: .center, spacing: 0) {
@@ -765,7 +149,7 @@ private struct ControlSurface: View {
 
                 Spacer(minLength: 8)
 
-                DirectionPad(buttonSize: buttonSize, send: send, sendDirection: sendDirection, provider: provider)
+                DirectionPad(buttonSize: buttonSize, send: send, sendDirection: sendDirection, kind: kind)
                     .padding(.horizontal, 8)
                     .offset(y: -(buttonSize * 0.45))
 
@@ -783,7 +167,9 @@ private struct ControlSurface: View {
                     RemoteButton(systemName: "playpause.fill", size: buttonSize) { send(.playPause) }
                 }
             }
+    }
 
+    private var numberControls: some View {
             Group {
                 HStack(spacing: 10) {
                     RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
@@ -801,8 +187,7 @@ private struct ControlSurface: View {
                     }
                 }
             }
-            .offset(y: -4)
-        }
+            .offset(y: isWide ? 0 : -4)
     }
 
     private func digitTitle(for key: OrangeKey) -> String {
@@ -824,121 +209,179 @@ private struct ControlSurface: View {
 
 // MARK: - Clean Mode
 
-private struct CleanControlSurface: View {
+struct CleanControlSurface: View {
     var buttonSize: CGFloat
+    var spacing: CGFloat
+    var touchPadHeight: CGFloat
     var send: (OrangeKey) -> Void
     var sendDirection: (OrangeKey, Int32) -> Void
     var sendText: (String) -> Void
     var toggleClassic: () -> Void
-    var provider: String
+    var kind: DeviceKind
+    var power: PowerActions
+    var showsBottomRow: Bool = true
     @Binding var isKeyboardVisible: Bool
-    var isCompact = false
     @State private var textFieldText = ""
+    @State private var isTextFieldPresented = false
 
-    private var isKeyboardCompactHeight: Bool {
-        isCompact || UIScreen.main.bounds.width <= 400
-    }
-
-    private var isMini: Bool {
-        let model: String
-        if let sim = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"] {
-            model = sim
-        } else {
-            var systemInfo = utsname()
-            uname(&systemInfo)
-            let mirror = Mirror(reflecting: systemInfo.machine)
-            model = mirror.children.compactMap { $0.value as? Int8 }.filter { $0 != 0 }.map { String(UnicodeScalar(UInt8($0))) }.joined()
-        }
-        return model == "iPhone13,1" || model == "iPhone14,4"
-    }
+    var isWide = false
+    var wideHeader: AnyView?
+    var sourceMenu: SourceMenu?
+    /// Rangées vides ajoutées au-dessus des boutons pour aligner le trackpad sur l'autre moitié (mode double).
+    var paddingRows = 0
 
     var body: some View {
-        VStack(spacing: isCompact ? 8 : (isKeyboardVisible ? (isKeyboardCompactHeight ? 6 : 10) : 16)) {
-                if provider == "Android TV" {
-                    RemoteButton(systemName: "power", size: buttonSize, tint: .orange) { send(.power) }
-
-                    if isKeyboardVisible {
-                        HStack(spacing: 10) {
-                            Button {
-                                sendText("\u{1B}")
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                    isKeyboardVisible = false
-                                    textFieldText = ""
-                                }
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .frame(width: buttonSize, height: buttonSize)
-                                    .staticGlassPanel(cornerRadius: 22)
-                            }
-
-                            VisibleTextField(
-                                text: $textFieldText,
-                                sendText: sendText,
-                                onSubmit: {
-                                    sendText("\n")
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                        isKeyboardVisible = false
-                                        textFieldText = ""
-                                    }
-                                },
-                                isActive: $isKeyboardVisible
-                            )
-                            .frame(height: buttonSize)
-                            .environment(\.glassTint, 0)
-                            .staticGlassPanel(cornerRadius: 22)
-                        }
-                        .transition(.asymmetric(
-                            insertion: .scale(scale: 0.3, anchor: .leading).combined(with: .opacity),
-                            removal: .scale(scale: 0.3, anchor: .leading).combined(with: .opacity)
-                        ))
-                    } else {
-                        HStack(spacing: 10) {
-                            RemoteButton(systemName: "keyboard", size: buttonSize) {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                    isKeyboardVisible = true
-                                }
-                            }
-                            RemoteButton(systemName: "minus", size: buttonSize) { send(.volumeDown) }
-                            RemoteButton(systemName: "plus", size: buttonSize) { send(.volumeUp) }
-                            RemoteButton(systemName: "speaker.slash.fill", size: buttonSize) { send(.mute) }
-                        }
-                        .transition(.asymmetric(
-                            insertion: .scale(scale: 0.8).combined(with: .opacity),
-                            removal: .scale(scale: 0.8).combined(with: .opacity)
-                        ))
+        Group {
+            if isWide {
+                // Grand écran large : nom et boutons en colonne à gauche, trackpad à droite.
+                HStack(alignment: .center, spacing: spacing * 2) {
+                    VStack(spacing: spacing) {
+                        wideHeader
+                        topControls
+                        bottomRow
                     }
+                    .frame(width: buttonSize * 4 + 48)
+                    touchPad
+                }
+            } else {
+                VStack(spacing: spacing) {
+                    if paddingRows > 0 {
+                        Color.clear.frame(height: (buttonSize + spacing) * CGFloat(paddingRows) - spacing)
+                    }
+                    topControls
+                    touchPad
+                    bottomRow
+                }
+            }
+        }
+        .onChange(of: isKeyboardVisible) { _, isActive in
+            if isActive {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    isTextFieldPresented = true
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
+            isKeyboardVisible = false
+            withAnimation(.easeInOut(duration: 0.18)) {
+                isTextFieldPresented = false
+                textFieldText = ""
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var topControls: some View {
+            if kind.supportsKeyboard {
+                powerRow
+
+                if isTextFieldPresented {
+                    HStack(spacing: 10) {
+                        Button {
+                            sendText("\u{1B}")
+                            isKeyboardVisible = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: buttonSize, height: buttonSize)
+                                .staticGlassPanel(cornerRadius: 22)
+                        }
+
+                        VisibleTextField(
+                            text: $textFieldText,
+                            sendText: sendText,
+                            onSubmit: {
+                                sendText("\n")
+                                isKeyboardVisible = false
+                            },
+                            isActive: $isKeyboardVisible
+                        )
+                        .frame(height: buttonSize)
+                        .environment(\.glassTint, 0)
+                        .staticGlassPanel(cornerRadius: 22)
+                    }
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.3, anchor: .leading).combined(with: .opacity),
+                        removal: .scale(scale: 0.3, anchor: .leading).combined(with: .opacity)
+                    ))
+                } else {
+                    HStack(spacing: 10) {
+                        RemoteButton(systemName: "keyboard", size: buttonSize) {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                isTextFieldPresented = true
+                            }
+                            isKeyboardVisible = true
+                        }
+                        RemoteButton(systemName: "minus", size: buttonSize) { send(.volumeDown) }
+                        RemoteButton(systemName: "plus", size: buttonSize) { send(.volumeUp) }
+                        RemoteButton(systemName: "speaker.slash.fill", size: buttonSize) { send(.mute) }
+                    }
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.8).combined(with: .opacity),
+                        removal: .scale(scale: 0.8).combined(with: .opacity)
+                    ))
+                }
+            } else if isWide && power.extra != nil {
+                // Colonne de 4 boutons : deux power + volume ne tiennent pas sur une ligne.
+                powerRow
+                HStack(spacing: 10) {
+                    RemoteButton(systemName: "minus", size: buttonSize) { send(.volumeDown) }
+                    RemoteButton(systemName: "plus", size: buttonSize) { send(.volumeUp) }
+                    RemoteButton(systemName: "speaker.slash.fill", size: buttonSize) { send(.mute) }
+                }
             } else {
                 HStack(spacing: 10) {
-                    RemoteButton(systemName: "power", size: buttonSize, tint: .orange) { send(.power) }
+                    PowerCluster(size: buttonSize, power: power)
                     RemoteButton(systemName: "minus", size: buttonSize) { send(.volumeDown) }
                     RemoteButton(systemName: "plus", size: buttonSize) { send(.volumeUp) }
                     RemoteButton(systemName: "speaker.slash.fill", size: buttonSize) { send(.mute) }
                 }
             }
+    }
 
-            TouchPad(buttonSize: buttonSize, send: send, sendDirection: sendDirection, isKeyboardMinimized: isKeyboardVisible, provider: provider, keyboardCompact: isKeyboardCompactHeight)
+    /// Power(s) à gauche, Source à droite, alignés sur la grille de 4 boutons.
+    private var powerRow: some View {
+        HStack(spacing: 10) {
+            PowerCluster(size: buttonSize, power: power)
+            if kind.supportsInput {
+                Spacer(minLength: 0)
+                SourceButton(size: buttonSize, menu: sourceMenu) { send(.input) }
+            }
+        }
+        .frame(width: kind.supportsInput ? buttonSize * 4 + 30 : nil)
+    }
 
-            if !(isKeyboardVisible && isMini) {
+    private var touchPad: some View {
+            TouchPad(
+                buttonSize: buttonSize,
+                height: touchPadHeight,
+                send: send,
+                sendDirection: sendDirection,
+                kind: kind
+            )
+    }
+
+    @ViewBuilder
+    private var bottomRow: some View {
+            if showsBottomRow {
                 HStack(spacing: 10) {
                     RemoteButton(systemName: "arrow.uturn.backward", size: buttonSize) { send(.back) }
                     RemoteButton(systemName: "playpause.fill", size: buttonSize) { send(.playPause) }
                     RemoteButton(systemName: "house.fill", size: buttonSize) { send(.menu) }
                     RemoteButton(systemName: "square.grid.3x3", size: buttonSize) { toggleClassic() }
                 }
+                .transition(.opacity)
             }
-        }
     }
 }
 
-private struct TouchPad: View {
+struct TouchPad: View {
     var buttonSize: CGFloat
+    var height: CGFloat
     var send: (OrangeKey) -> Void
     var sendDirection: (OrangeKey, Int32) -> Void
-    var isKeyboardMinimized: Bool = false
-    var provider: String = "Orange"
-    var keyboardCompact: Bool = false
+    var kind: DeviceKind = .orange
 
     @State private var isActive = false
     @State private var dragTranslation: CGSize = .zero
@@ -951,12 +394,6 @@ private struct TouchPad: View {
     private let longPressDuration: Duration = .milliseconds(800)
 
     var body: some View {
-        let height: CGFloat = isKeyboardMinimized
-            ? (keyboardCompact
-                ? max(120, min(170, buttonSize * 3.5))
-                : max(180, min(300, buttonSize * 4.2)))
-            : max(200, min(360, buttonSize * 5.2))
-
         Color.clear
             .frame(maxWidth: .infinity)
             .frame(height: height)
@@ -1002,7 +439,7 @@ private struct TouchPad: View {
                         if !wasActive {
                             didSendDown = false
                             didLongPress = false
-                            if provider == "Android TV" {
+                            if kind.supportsLongPress {
                                 touchTask = Task {
                                     try? await Task.sleep(for: swipeDetection)
                                     guard !Task.isCancelled, isActive else { return }
@@ -1036,7 +473,7 @@ private struct TouchPad: View {
                             }
                             send(direction)
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        } else if provider == "Android TV" {
+                        } else if kind.supportsLongPress {
                             if didLongPress {
                                 sendDirection(.ok, 2)
                             } else if didSendDown && isTap {
@@ -1072,11 +509,11 @@ private struct TouchPad: View {
     }
 }
 
-private struct DirectionPad: View {
+struct DirectionPad: View {
     var buttonSize: CGFloat
     var send: (OrangeKey) -> Void
     var sendDirection: (OrangeKey, Int32) -> Void
-    var provider: String
+    var kind: DeviceKind
 
     var body: some View {
         Grid(horizontalSpacing: 6, verticalSpacing: 6) {
@@ -1087,7 +524,7 @@ private struct DirectionPad: View {
             }
             GridRow {
                 RemoteButton(systemName: "chevron.left", size: buttonSize) { send(.left) }
-                if provider == "Android TV" {
+                if kind.supportsLongPress {
                     LongPressOkButton(size: buttonSize, send: send, sendDirection: sendDirection)
                 } else {
                     RemoteButton(title: String(localized: "OK"), size: buttonSize, prominent: true) { send(.ok) }
@@ -1103,7 +540,7 @@ private struct DirectionPad: View {
     }
 }
 
-private struct LongPressOkButton: View {
+struct LongPressOkButton: View {
     @Environment(\.buttonShape) private var buttonShape
     var size: CGFloat
     var send: (OrangeKey) -> Void
@@ -1165,7 +602,86 @@ private struct LongPressOkButton: View {
     }
 }
 
-private struct VerticalPair: View {
+/// Boutons power : celui de l'appareil de l'onglet, plus éventuellement celui d'un autre onglet.
+/// Menu Source : la liste des entrées fournie par la TV.
+struct SourceMenu {
+    var sources: [InputSource]
+    var currentID: String?
+    var load: () -> Void
+    var select: (InputSource) -> Void
+}
+
+/// Bouton Source : ouvre la liste des entrées quand la TV la donne, sinon envoie la touche Source.
+struct SourceButton: View {
+    @Environment(\.buttonShape) private var buttonShape
+    var size: CGFloat
+    var menu: SourceMenu?
+    var fallback: () -> Void
+
+    var body: some View {
+        Group {
+            if let menu, !menu.sources.isEmpty {
+                Menu {
+                    ForEach(menu.sources) { source in
+                        Button {
+                            menu.select(source)
+                        } label: {
+                            if source.id == menu.currentID {
+                                Label(source.label, systemImage: "checkmark")
+                            } else if !source.isConnected {
+                                Text(source.label)
+                                Text("Rien de branché")
+                            } else {
+                                Text(source.label)
+                            }
+                        }
+                    }
+                } label: {
+                    icon
+                }
+                .menuStyle(.button)
+                .buttonStyle(RemoteGlassButtonStyle())
+                .simultaneousGesture(TapGesture().onEnded { menu.load() })
+            } else {
+                Button(action: fallback) { icon }
+                    .buttonStyle(RemoteGlassButtonStyle())
+            }
+        }
+        .accessibilityLabel(Text("Source"))
+        .onAppear { menu?.load() }
+    }
+
+    private var icon: some View {
+        Image(systemName: "rectangle.on.rectangle")
+            .font(.system(size: size * 0.34, weight: .semibold))
+            .frame(width: size, height: size)
+            .contentShape(RoundedRectangle(cornerRadius: buttonShape == .circle ? size / 2 : 20, style: .continuous))
+    }
+}
+
+struct PowerActions {
+    var primary: () -> Void
+    var primaryBadge: String = ""
+    var extra: (() -> Void)?
+    var extraBadge: String = ""
+}
+
+struct PowerCluster: View {
+    var size: CGFloat
+    var power: PowerActions
+
+    var body: some View {
+        HStack(spacing: 10) {
+            RemoteButton(systemName: "power", size: size, tint: .orange, badge: power.extra == nil ? nil : power.primaryBadge, action: power.primary)
+            if let extra = power.extra {
+                RemoteButton(systemName: "power", size: size, badge: power.extraBadge, action: extra)
+                    .transition(.scale(scale: 0.5).combined(with: .opacity))
+            }
+        }
+    }
+}
+
+struct VerticalPair: View {
     var topIcon: String
     var bottomIcon: String
     var title: String
@@ -1184,13 +700,14 @@ private struct VerticalPair: View {
     }
 }
 
-private struct RemoteButton: View {
+struct RemoteButton: View {
     @Environment(\.buttonShape) private var buttonShape
     var title: String?
     var systemName: String?
     var size: CGFloat
     var prominent = false
     var tint: Color?
+    var badge: String?
     var action: () -> Void
 
     init(title: String, size: CGFloat, prominent: Bool = false, tint: Color? = nil, action: @escaping () -> Void) {
@@ -1202,12 +719,13 @@ private struct RemoteButton: View {
         self.action = action
     }
 
-    init(systemName: String, size: CGFloat, prominent: Bool = false, tint: Color? = nil, action: @escaping () -> Void) {
+    init(systemName: String, size: CGFloat, prominent: Bool = false, tint: Color? = nil, badge: String? = nil, action: @escaping () -> Void) {
         self.title = nil
         self.systemName = systemName
         self.size = size
         self.prominent = prominent
         self.tint = tint
+        self.badge = badge
         self.action = action
     }
 
@@ -1224,6 +742,14 @@ private struct RemoteButton: View {
                 }
             }
             .frame(width: size, height: size)
+            .overlay(alignment: .bottom) {
+                if let badge {
+                    Text(badge)
+                        .font(.system(size: max(8, size * 0.15), weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .padding(.bottom, size * 0.1)
+                }
+            }
             .contentShape(RoundedRectangle(cornerRadius: cr, style: .continuous))
         }
         .buttonStyle(RemoteGlassButtonStyle(prominent: prominent))
@@ -1232,7 +758,7 @@ private struct RemoteButton: View {
     }
 }
 
-private struct RemoteGlassButtonStyle: ButtonStyle {
+struct RemoteGlassButtonStyle: ButtonStyle {
     @Environment(\.disableStretch) var disableStretch
     var prominent = false
 
@@ -1256,7 +782,7 @@ private struct RemoteGlassButtonStyle: ButtonStyle {
     }
 }
 
-private struct RemoteGlassButtonChrome: ViewModifier {
+struct RemoteGlassButtonChrome: ViewModifier {
     @Environment(\.glassTint) var glassTint
     @Environment(\.buttonShape) var buttonShape
     @Environment(\.disableStretch) var disableStretch
@@ -1306,361 +832,7 @@ private struct RemoteGlassButtonChrome: ViewModifier {
     }
 }
 
-private struct BackgroundSettingsPanel: View {
-    @Binding var colors: [Color]
-    @Binding var imageData: Data?
-    @Binding var showPhoto: Bool
-    @Binding var weight: Double
-    @Binding var spread: Double
-    @Binding var tint: Double
-    @Binding var buttonShape: ButtonShape
-    @Binding var disableStretch: Bool
-    @Binding var selectedProvider: String
-    @Binding var hasCustomizedColors: Bool
-    @State private var isProviderExpanded = false
-    @State private var isBackgroundExpanded = false
-    @State private var isButtonsExpanded = false
-    @State private var mode: BackgroundMode = .gradient
-    @State private var showPhotoPicker = false
-    @State private var wallpaperDraft: WallpaperDraft?
-
-    private var color1Binding: Binding<Color> {
-        Binding(
-            get: { colors.first ?? .black },
-            set: { colors[0] = $0; hasCustomizedColors = true }
-        )
-    }
-
-    private var color2Binding: Binding<Color> {
-        Binding(
-            get: { colors.last ?? (colors.first ?? .orange) },
-            set: { colors[colors.count - 1] = $0; hasCustomizedColors = true }
-        )
-    }
-
-    private var accentColor: Color {
-        colors.count > 2 ? .blue : .orange
-    }
-
-    private static let orangePreset: [Color] = [
-        Color(hex: "000000") ?? .black,
-        Color(hex: "FF6A00") ?? .orange,
-    ]
-
-    private static let googleTVPreset: [Color] = [
-        Color(hex: "000000") ?? .black,
-        Color(hex: "4285F4") ?? .blue,
-        Color(hex: "34A853") ?? .green,
-        Color(hex: "EA4335") ?? .red,
-        Color(hex: "FBBC04") ?? .yellow,
-    ]
-
-    private enum BackgroundMode: String, CaseIterable, Identifiable {
-        case gradient
-        case image
-        var id: String { rawValue }
-        var localizedName: String {
-            switch self {
-            case .gradient: String(localized: "Dégradé")
-            case .image: String(localized: "Photo")
-            }
-        }
-    }
-
-    var body: some View {
-        VStack(spacing: 14) {
-            Button {
-                withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                    isProviderExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "network")
-                        .font(.headline)
-                    Text("Fournisseur (bêta)")
-                        .font(.headline)
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .rotationEffect(.degrees(isProviderExpanded ? 180 : 0))
-                }
-                .foregroundStyle(.white)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isProviderExpanded {
-                HStack(spacing: 10) {
-                    Button {
-                        selectedProvider = "Orange"
-                    } label: {
-                        Text("Orange")
-                            .frame(maxWidth: .infinity)
-                            .frame(minHeight: 44)
-                    }
-                    .buttonStyle(RemoteGlassButtonStyle(prominent: selectedProvider == "Orange"))
-                    .environment(\.buttonShape, .squircle)
-
-                    Button {
-                        selectedProvider = "Android TV"
-                    } label: {
-                        Text("Google TV")
-                            .frame(maxWidth: .infinity)
-                            .frame(minHeight: 44)
-                    }
-                    .buttonStyle(RemoteGlassButtonStyle(prominent: selectedProvider == "Android TV"))
-                    .environment(\.buttonShape, .squircle)
-                }
-            }
-
-            Divider()
-                .overlay(.white.opacity(0.15))
-
-            Button {
-                withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                    isBackgroundExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "paintpalette.fill")
-                        .font(.headline)
-                    Text("Fond d'écran")
-                        .font(.headline)
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .rotationEffect(.degrees(isBackgroundExpanded ? 180 : 0))
-                }
-                .foregroundStyle(.white)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isBackgroundExpanded {
-                Picker("Mode", selection: $mode) {
-                    ForEach(BackgroundMode.allCases) { mode in
-                        Text(mode.localizedName).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-
-                if mode == .gradient {
-                    VStack(spacing: 12) {
-                        if colors.count == 2 {
-                            Group {
-                                ColorPicker("Couleur 1", selection: color1Binding, supportsOpacity: false)
-                                    .foregroundStyle(.white)
-
-                                ColorPicker("Couleur 2", selection: color2Binding, supportsOpacity: false)
-                                    .foregroundStyle(.white)
-
-                            VStack(spacing: 4) {
-                                HStack {
-                                    Text("Hauteur")
-                                        .font(.caption)
-                                    Spacer()
-                                    Text("\(Int(weight * 100))%")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white.opacity(0.65))
-                                }
-                                Slider(value: $weight, in: 0...1)
-                                    .tint(accentColor)
-                            }
-
-                            VStack(spacing: 4) {
-                                HStack {
-                                    Text("Progression")
-                                        .font(.caption)
-                                    Spacer()
-                                    Text("\(Int(spread * 100))%")
-                                        .font(.caption2)
-                                        .foregroundStyle(.white.opacity(0.65))
-                                }
-                                Slider(value: $spread, in: 0...1)
-                                    .tint(accentColor)
-                            }
-                            }
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-
-                        let isGoogleTVTheme = colors.count > 2
-                        Button {
-                            withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                                if isGoogleTVTheme {
-                                    colors = Self.orangePreset
-                                } else {
-                                    colors = Self.googleTVPreset
-                                }
-                                hasCustomizedColors = true
-                                weight = 0.5
-                                spread = 0.5
-                            }
-                        } label: {
-                            Text("Thème Google TV")
-                                .lineLimit(1)
-                                .frame(maxWidth: .infinity)
-                                .frame(minHeight: 44)
-                                .overlay(alignment: .leading) {
-                                    Image(systemName: isGoogleTVTheme ? "checkmark.circle.fill" : "circle")
-                                        .font(.title3)
-                                        .foregroundStyle(isGoogleTVTheme ? accentColor : .white.opacity(0.6))
-                                        .padding(.leading, 16)
-                                }
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(RemoteGlassButtonStyle(prominent: isGoogleTVTheme))
-
-                        Button {
-                            withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                                colors = RemoteViewModel.defaultPreset(for: selectedProvider)
-                                weight = 0.5
-                                spread = 0.5
-                                hasCustomizedColors = false
-                            }
-                        } label: {
-                            Label("Réinitialiser", systemImage: "arrow.counterclockwise")
-                                .frame(maxWidth: .infinity)
-                                .frame(minHeight: 40)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(RemoteGlassButtonStyle())
-                    }
-                } else {
-                    let hasImage = imageData != nil
-                    Button {
-                        showPhotoPicker = true
-                    } label: {
-                        PhotoPickerLabel(hasImage: hasImage)
-                    }
-                    .buttonStyle(RemoteGlassButtonStyle(prominent: true))
-
-                    if imageData != nil {
-                        Button(role: .destructive) {
-                            imageData = nil
-                        } label: {
-                            Label("Supprimer la photo", systemImage: "trash")
-                                .frame(maxWidth: .infinity)
-                                .frame(minHeight: 44)
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(RemoteGlassButtonStyle())
-                    }
-                }
-            }
-
-            Divider()
-                .overlay(.white.opacity(0.15))
-
-            Button {
-                withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                    isButtonsExpanded.toggle()
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "square.grid.3x3")
-                        .font(.headline)
-                    Text("Boutons")
-                        .font(.headline)
-                    Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                        .rotationEffect(.degrees(isButtonsExpanded ? 180 : 0))
-                }
-                .foregroundStyle(.white)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isButtonsExpanded {
-                let isCircular = buttonShape == .circle
-                Button {
-                    withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                        buttonShape = isCircular ? .squircle : .circle
-                    }
-                } label: {
-                    Text("Boutons circulaires")
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 44)
-                        .overlay(alignment: .leading) {
-                            Image(systemName: isCircular ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundStyle(isCircular ? accentColor : .white.opacity(0.6))
-                                .padding(.leading, 16)
-                        }
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(RemoteGlassButtonStyle(prominent: isCircular))
-
-                Toggle("Désactiver HDR et étirement", isOn: $disableStretch)
-                    .font(.caption)
-                    .foregroundStyle(.white)
-                    .tint(accentColor)
-
-                VStack(spacing: 4) {
-                    HStack {
-                        Text("Teinte Liquid Glass")
-                            .font(.caption)
-                        Spacer()
-                        Text("\(Int(tint * 100))%")
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.65))
-                    }
-                    HStack(spacing: 8) {
-                        Image(systemName: "drop")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.5))
-                        Slider(value: $tint, in: 0...1)
-                            .tint(accentColor)
-                        Image(systemName: "drop.fill")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.8))
-                    }
-                }
-
-                if let major = Int(UIDevice.current.systemVersion.split(separator: ".").first ?? ""), major >= 27 {
-                    Text("Vous êtes sur iOS \(UIDevice.current.systemVersion), la teinte du Liquid Glass dépend aussi de vos réglages d'apparence iOS")
-                        .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.4))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            }
-
-        }
-        .padding(14)
-        .staticGlassPanel()
-        .onChange(of: mode) { _, newMode in
-            showPhoto = newMode == .image
-        }
-        .onAppear {
-            mode = showPhoto ? .image : .gradient
-        }
-        .fullScreenCover(isPresented: $showPhotoPicker) {
-            WallpaperPhotoPicker { image, targetPixelSize in
-                wallpaperDraft = WallpaperDraft(image: WallpaperImageProcessor.normalizedImage(from: image), targetPixelSize: targetPixelSize)
-                showPhotoPicker = false
-            } onCancel: {
-                showPhotoPicker = false
-            }
-            .ignoresSafeArea()
-        }
-        .fullScreenCover(item: $wallpaperDraft) { draft in
-            WallpaperCropView(image: draft.image, targetPixelSize: draft.targetPixelSize) { wallpaper in
-                if let jpeg = wallpaper.jpegData(compressionQuality: 0.95) {
-                    imageData = jpeg
-                    showPhoto = true
-                    mode = .image
-                }
-                wallpaperDraft = nil
-            } onCancel: {
-                wallpaperDraft = nil
-            }
-            .ignoresSafeArea()
-        }
-    }
-}
-
-private struct PhotoPickerLabel: View {
+struct PhotoPickerLabel: View {
     var hasImage: Bool
 
     var body: some View {
@@ -1672,13 +844,13 @@ private struct PhotoPickerLabel: View {
     }
 }
 
-private struct WallpaperDraft: Identifiable {
+struct WallpaperDraft: Identifiable {
     let id = UUID()
     let image: UIImage
     let targetPixelSize: CGSize
 }
 
-private struct WallpaperPhotoPicker: UIViewControllerRepresentable {
+struct WallpaperPhotoPicker: UIViewControllerRepresentable {
     let onPick: (UIImage, CGSize) -> Void
     let onCancel: () -> Void
 
@@ -1721,7 +893,7 @@ private struct WallpaperPhotoPicker: UIViewControllerRepresentable {
     }
 }
 
-private struct WallpaperCropView: View {
+struct WallpaperCropView: View {
     let image: UIImage
     let targetPixelSize: CGSize
     let onCrop: (UIImage) -> Void
@@ -1890,7 +1062,7 @@ private struct WallpaperCropView: View {
     }
 }
 
-private struct CropGridOverlay: View {
+struct CropGridOverlay: View {
     let size: CGSize
 
     var body: some View {
@@ -1938,7 +1110,7 @@ private extension UIViewController {
     }
 }
 
-private enum WallpaperImageProcessor {
+enum WallpaperImageProcessor {
     static func renderWallpaper(from image: UIImage, cropRect: CGRect, targetPixelSize: CGSize) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
 
@@ -1976,73 +1148,7 @@ private enum WallpaperImageProcessor {
     }
 }
 
-private struct BackgroundView: View {
-    var colors: [Color]
-    var imageData: Data?
-    var showImage: Bool = true
-    var weight: Double = 0.5
-    var spread: Double = 0.5
-
-    var body: some View {
-        ZStack {
-            if showImage, let imageData, let uiImage = UIImage(data: imageData) {
-                GeometryReader { proxy in
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: proxy.size.width, height: proxy.size.height)
-                        .clipped()
-                }
-            } else if colors.count > 2 {
-                let base = colors.first ?? .black
-                let bandColors = Array(colors.dropFirst())
-                ZStack {
-                    base
-                    LinearGradient(
-                        gradient: Gradient(colors: bandColors),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .mask(
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: .clear, location: 0),
-                                .init(color: .clear, location: 0.55),
-                                .init(color: .white.opacity(0.5), location: 0.7),
-                                .init(color: .white, location: 0.85),
-                                .init(color: .white, location: 1),
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                }
-            } else {
-                let c1 = colors.first ?? .black
-                let c2 = colors.last ?? c1
-                let s = max(0, weight - (0.01 + spread * 0.49))
-                let e = min(1, weight + (0.01 + spread * 0.49))
-
-                LinearGradient(
-                    gradient: Gradient(stops: [
-                        .init(color: c1, location: 0),
-                        .init(color: c1, location: s),
-                        .init(color: c2, location: e),
-                        .init(color: c2, location: 1),
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .overlay(Color.black.opacity(0.06))
-            }
-        }
-        .ignoresSafeArea()
-    }
-}
-
-
-
-private struct VisibleTextField: UIViewRepresentable {
+struct VisibleTextField: UIViewRepresentable {
     @Binding var text: String
     var sendText: (String) -> Void
     var onSubmit: () -> Void
@@ -2124,7 +1230,7 @@ private struct VisibleTextField: UIViewRepresentable {
     }
 }
 
-private class BackspaceReportingTextField: UITextField {
+class BackspaceReportingTextField: UITextField {
     var onDeleteBackward: (() -> Void)?
 
     override func deleteBackward() {
@@ -2133,7 +1239,7 @@ private class BackspaceReportingTextField: UITextField {
     }
 }
 
-private struct TintedGlassPanelModifier: ViewModifier {
+struct TintedGlassPanelModifier: ViewModifier {
     @Environment(\.glassTint) var glassTint
     var cornerRadius: CGFloat
 
@@ -2161,7 +1267,7 @@ private struct TintedGlassPanelModifier: ViewModifier {
     }
 }
 
-private extension View {
+extension View {
     @ViewBuilder
     func glassPanel(cornerRadius: CGFloat = 24) -> some View {
         if #available(iOS 26.0, *) {
@@ -2179,7 +1285,7 @@ private extension View {
     }
 }
 
-private struct GlassTintKey: EnvironmentKey {
+struct GlassTintKey: EnvironmentKey {
     static let defaultValue: Double = 0
 }
 
@@ -2190,7 +1296,7 @@ extension EnvironmentValues {
     }
 }
 
-private struct ButtonShapeKey: EnvironmentKey {
+struct ButtonShapeKey: EnvironmentKey {
     static let defaultValue: ButtonShape = .squircle
 }
 
@@ -2201,145 +1307,7 @@ extension EnvironmentValues {
     }
 }
 
-// MARK: - Onboarding
-
-private struct OnboardingView: View {
-    @Binding var provider: String
-    var accentColor: Color
-    var onConfirm: () -> Void
-
-    var body: some View {
-        VStack(spacing: 20) {
-            Spacer().frame(height: 50)
-
-            Text("Bienvenue sur\nRemoteGlass")
-                .font(.title2.weight(.bold))
-                .multilineTextAlignment(.center)
-
-            Text("Choisissez votre fournisseur")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.7))
-
-            HStack(spacing: 12) {
-                    providerButton(
-                        name: "Orange",
-                        isSelected: provider == "Orange",
-                        icon: {
-                            (UIImage(named: "orangedecoder").map { Image(uiImage: $0) } ?? Image(systemName: "tv"))
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: .infinity, maxHeight: 70)
-                        },
-                        action: { provider = "Orange" }
-                    )
-
-                providerButton(
-                    name: "Google TV",
-                    isSelected: provider == "Android TV",
-                    icon: {
-                        (UIImage(named: "playerpop").map { Image(uiImage: $0) } ?? Image(systemName: "tv"))
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: .infinity, maxHeight: 70)
-                    },
-                    action: { provider = "Android TV" }
-                )
-            }
-
-            if provider == "Orange" {
-                compatibleOrange
-            } else {
-                compatibleGoogleTV
-            }
-
-            Spacer()
-
-            Button(action: onConfirm) {
-                Text("Confirmer")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .frame(minHeight: 52)
-                    .background(accentColor, in: Capsule())
-                    .glassEffect(.regular.interactive(), in: .capsule)
-                    .foregroundStyle(.white)
-            }
-            .padding(.bottom, 20)
-        }
-        .padding(.horizontal, 24)
-    }
-
-    private func providerButton(name: LocalizedStringKey, isSelected: Bool, @ViewBuilder icon: () -> some View, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                icon()
-                Text(name)
-                    .font(.subheadline.weight(.medium))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: 130)
-            .contentShape(.interaction, RoundedRectangle(cornerRadius: 20))
-        }
-        .buttonStyle(RemoteGlassButtonStyle(prominent: isSelected))
-        .clipShape(RoundedRectangle(cornerRadius: 24))
-        .shadow(color: isSelected ? accentColor.opacity(0.45) : .clear, radius: 12, x: 0, y: 0)
-        .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(isSelected ? accentColor : .clear, lineWidth: 2)
-        )
-    }
-
-    private var compatibleOrange: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(accentColor)
-            Text("Compatible avec tous les décodeurs Orange")
-                .font(.subheadline)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-    }
-
-    private var compatibleGoogleTV: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Compatible avec :")
-                .font(.subheadline.weight(.semibold))
-            CompatibleRow(colors: [.red], name: "Free", description: "Player Pop et Mini 4K")
-            CompatibleRow(colors: [.blue], name: "Bouygues", description: "Bbox Miami, 4K et 4K HDR")
-            CompatibleRow(colors: [.red, .green], name: "SFR/RED", description: "Connect TV")
-            CompatibleRow(colors: [.white], name: "Autres", description: "Tout appareil Android TV / Google TV")
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-    }
-}
-
-private struct CompatibleRow: View {
-    let colors: [Color]
-    let name: LocalizedStringKey
-    let description: LocalizedStringKey
-
-    var body: some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 2) {
-                ForEach(Array(colors.enumerated()), id: \.offset) { _, color in
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(color)
-                        .font(.caption)
-                }
-            }
-            Text(name)
-                .font(.caption.weight(.medium))
-            Text(description)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.65))
-        }
-    }
-}
-
-private struct DisableStretchKey: EnvironmentKey {
+struct DisableStretchKey: EnvironmentKey {
     static let defaultValue: Bool = false
 }
 
