@@ -70,7 +70,8 @@ struct DeviceSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var confirmDelete = false
 
-    private var accent: Color { hub.sharedBackground.accent }
+    /// Réglages d'un appareil : couleur de sa marque (bordeaux LG, bleu Samsung…), quel que soit le fond.
+    private var accent: Color { hub.device(deviceID)?.kind.accent ?? hub.sharedBackground.accent }
 
     var body: some View {
         if let device = hub.device(deviceID) {

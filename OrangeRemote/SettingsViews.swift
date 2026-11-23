@@ -1066,37 +1066,20 @@ struct BackgroundEditor: View {
                     .buttonStyle(RemoteGlassButtonStyle())
                 }
             } else {
-                // Thèmes prêts à l'emploi, un par marque
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(DeviceKind.allCases) { kind in
-                            let preset = BackgroundStyle.preset(for: kind)
-                            let isOn = preset.colorHexes == style.colorHexes
-                            Button {
-                                withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
-                                    style.colorHexes = preset.colorHexes
-                                    style.weight = 0.5
-                                    style.spread = 0.5
-                                }
-                            } label: {
-                                VStack(spacing: 6) {
-                                    BackgroundView(style: preset)
-                                        .frame(width: 58, height: 58)
-                                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(isOn ? accent : .white.opacity(0.2), lineWidth: isOn ? 2.5 : 1))
-                                    Text(kind.shortName)
-                                        .font(.caption2.weight(.medium))
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(3)
-                }
+                // Thèmes prêts à l'emploi : un par marque, puis des dégradés libres
+                presetRow(String(localized: "Marques"), presets: DeviceKind.allCases.map { (Text($0.shortName), BackgroundStyle.preset(for: $0)) })
+                presetRow(String(localized: "Dégradés"), presets: BackgroundStyle.gradientPresets.map { (Text($0.name), $0.style) })
+                presetRow(String(localized: "Colorés"), presets: BackgroundStyle.colorfulPresets.map { (Text($0.name), $0.style) })
 
                 if style.colorHexes.count == 2 {
                     ColorPicker("Couleur 1", selection: color1, supportsOpacity: false)
                     ColorPicker("Couleur 2", selection: color2, supportsOpacity: false)
+                    slider(String(localized: "Hauteur"), value: $style.weight)
+                    slider(String(localized: "Progression"), value: $style.spread)
+                } else if style.isMesh {
+                    ForEach(style.colorHexes.indices, id: \.self) { index in
+                        ColorPicker("Couleur \(index + 1)", selection: meshColor(index), supportsOpacity: false)
+                    }
                     slider(String(localized: "Hauteur"), value: $style.weight)
                     slider(String(localized: "Progression"), value: $style.spread)
                 }
@@ -1123,6 +1106,51 @@ struct BackgroundEditor: View {
                 wallpaperDraft = nil
             }
             .ignoresSafeArea()
+        }
+    }
+
+    private func meshColor(_ index: Int) -> Binding<Color> {
+        Binding(
+            get: { index < style.colors.count ? style.colors[index] : .black },
+            set: { var c = style.colors; if index < c.count { c[index] = $0 }; style.colors = c }
+        )
+    }
+
+    private func presetRow(_ title: String, presets: [(label: Text, style: BackgroundStyle)]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.6))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(presets.indices, id: \.self) { index in
+                        let preset = presets[index].style
+                        let isOn = preset.colorHexes == style.colorHexes && preset.isMesh == style.isMesh
+                        Button {
+                            withAnimation(.interactiveSpring(response: 0.35, dampingFraction: 0.85)) {
+                                style.colorHexes = preset.colorHexes
+                                style.isMesh = preset.isMesh
+                                style.weight = 0.5
+                                style.spread = 0.5
+                            }
+                        } label: {
+                            VStack(spacing: 6) {
+                                BackgroundView(style: preset)
+                                    .frame(width: 58, height: 58)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(isOn ? accent : .white.opacity(0.2), lineWidth: isOn ? 2.5 : 1))
+                                presets[index].label
+                                    .font(.caption2.weight(.medium))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.75)
+                            }
+                            .frame(width: 66)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(3)
+            }
         }
     }
 

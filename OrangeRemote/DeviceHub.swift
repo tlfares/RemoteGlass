@@ -290,7 +290,7 @@ final class DeviceHub: ObservableObject {
     }
 
     /// Le thème Google (dégradé multicolore) active l'icône alternative.
-    var prefersGoogleIcon: Bool { sharedBackground.colorHexes.count > 2 }
+    var prefersGoogleIcon: Bool { sharedBackground.colorHexes.count > 2 && !sharedBackground.isMesh }
 
     // MARK: Envoi de commandes
 

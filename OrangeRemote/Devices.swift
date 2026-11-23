@@ -198,6 +198,8 @@ struct BackgroundStyle: Codable, Equatable, Sendable {
     var showPhoto: Bool = false
     var weight: Double = 0.5
     var spread: Double = 0.5
+    /// Dégradé fondu à plusieurs teintes (sinon, > 2 couleurs = bandeau « Google »).
+    var isMesh: Bool = false
 
     var colors: [Color] {
         get { colorHexes.compactMap { Color(hex: $0) } }
@@ -208,18 +210,57 @@ struct BackgroundStyle: Codable, Equatable, Sendable {
         BackgroundStyle(colorHexes: kind.defaultColors.map(\.hex))
     }
 
-    /// Couleur d'accent cohérente avec le fond (bleu pour les dégradés « Google »).
+    /// Couleur d'accent cohérente avec le fond : sa teinte la plus vive, éclaircie si besoin.
+    /// Bleu pour le bandeau « Google », gris clair pour un fond sans couleur.
     var accent: Color {
-        colorHexes.count > 2 ? .blue : (colors.last ?? .orange).saturatedAccent
+        if colorHexes.count > 2 && !isMesh { return .blue }
+        var best: (h: CGFloat, s: CGFloat, b: CGFloat, score: CGFloat)?
+        var brightestGray: CGFloat = 0
+        for color in colors {
+            var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            UIColor(color).getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+            brightestGray = max(brightestGray, b)
+            guard s >= 0.2, b >= 0.12 else { continue }
+            let score = s * b
+            if score > (best?.score ?? 0) { best = (h, s, b, score) }
+        }
+        guard let best else {
+            // Fond noir / gris : un gris clair lisible, un peu plus clair que la teinte la plus claire.
+            return Color(white: min(0.85, max(0.62, brightestGray + 0.2)))
+        }
+        return Color(UIColor(hue: best.h, saturation: best.s, brightness: max(best.b, 0.62), alpha: 1))
     }
-}
 
-private extension Color {
-    /// Les fonds très sombres donnent un accent illisible : on retombe sur l'orange.
-    var saturatedAccent: Color {
-        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        UIColor(self).getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-        return (s < 0.25 || b < 0.25) ? .orange : self
+    /// Dégradés prêts à l'emploi, indépendants des marques.
+    static let gradientPresets: [(name: LocalizedStringResource, style: BackgroundStyle)] = [
+        ("Graphite", .mesh("000000", "2C2C30", "75757C")),
+        ("Minuit", .mesh("000000", "0A1838", "2F5FD0")),
+        ("Lagon", .mesh("000000", "003449", "00A3C4")),
+        ("Aurore", .mesh("000000", "0A2E38", "149A80", "6A4CE0")),
+        ("Crépuscule", .mesh("000000", "45103C", "E0457B", "FFA24C")),
+        ("Braise", .mesh("000000", "3A0A00", "C8331A", "FF8A1F")),
+        ("Lavande", .mesh("000000", "26144A", "9C6ADE")),
+        ("Forêt", .mesh("000000", "0D2817", "2E8C4C")),
+        ("Cuivre", .mesh("000000", "33201B", "C4876A")),
+        ("Néon", .mesh("000000", "1B0F45", "D3218F", "18C7E6")),
+    ]
+
+    /// Dégradés sans noir, assez profonds pour garder le texte blanc lisible.
+    static let colorfulPresets: [(name: LocalizedStringResource, style: BackgroundStyle)] = [
+        ("Océan", .mesh("0B3D91", "1E6FD9", "38B6FF")),
+        ("Ciel", .mesh("1C3F7A", "4A7BD0", "8FC1F2")),
+        ("Corail", .mesh("8A1C3C", "E0475B", "FF9A6B")),
+        ("Prune", .mesh("3B1C5A", "8E3B8F", "F06C9B")),
+        ("Cerise", .mesh("4A0A1E", "B3123F", "FF5E7E")),
+        ("Mojito", .mesh("0F4C3A", "1F9D6B", "9BD65A")),
+        ("Glacier", .mesh("134E5E", "2E8C99", "71B280")),
+        ("Sable", .mesh("5A3E2B", "A9744F", "E3B27A")),
+        ("Ardoise", .mesh("2B3440", "4F5D6E", "8A99AB")),
+        ("Mirage", .mesh("2E1A6B", "6A3FC9", "E0569B", "FFB36B")),
+    ]
+
+    static func mesh(_ hexes: String...) -> BackgroundStyle {
+        BackgroundStyle(colorHexes: hexes, isMesh: true)
     }
 }
 
@@ -416,7 +457,7 @@ extension RemoteTabConfig {
 
 extension BackgroundStyle {
     private enum CodingKeys: String, CodingKey {
-        case colorHexes, imageFile, showPhoto, weight, spread
+        case colorHexes, imageFile, showPhoto, weight, spread, isMesh
     }
 
     init(from decoder: Decoder) throws {
@@ -426,6 +467,7 @@ extension BackgroundStyle {
         showPhoto = (try? c.decodeIfPresent(Bool.self, forKey: .showPhoto)) ?? false
         weight = (try? c.decodeIfPresent(Double.self, forKey: .weight)) ?? 0.5
         spread = (try? c.decodeIfPresent(Double.self, forKey: .spread)) ?? 0.5
+        isMesh = (try? c.decodeIfPresent(Bool.self, forKey: .isMesh)) ?? false
     }
 }
 

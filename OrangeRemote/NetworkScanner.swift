@@ -172,15 +172,31 @@ enum NetworkScanner {
         return DiscoveredDevice(kind: .samsung, name: name, ip: ip, mac: mac)
     }
 
-    /// Le serveur SSAP des TV LG répond « hello world » en HTTP sur le port 3000.
+    /// Le serveur SSAP des TV LG répond « hello world » en HTTP sur le port 3000, ou en HTTPS sur 3001
+    /// (les mises à jour de sécurité ferment souvent le 3000, et les TV d'avant 2018 n'ont pas AirPlay).
+    /// En dernier recours, on demande directement à la TV en SSDP si elle est une webOS.
     private static func probeLG(ip: String) async -> DiscoveredDevice? {
-        guard let url = URL(string: "http://\(ip):3000/") else { return nil }
+        async let plain = lgSaysHello("http://\(ip):3000/")
+        async let secure = lgSaysHello("https://\(ip):3001/")
+        let (helloPlain, helloSecure) = await (plain, secure)
+        let hello = helloPlain || helloSecure
+        if !hello {
+            async let open3000 = isTCPPortOpen(ip: ip, port: 3000, timeout: 1.0)
+            async let open3001 = isTCPPortOpen(ip: ip, port: 3001, timeout: 1.0)
+            let (has3000, has3001) = await (open3000, open3001)
+            guard has3000 || has3001 else { return nil }
+        }
+        let upnp = await LGSSDPProbe.query(ip: ip)
+        guard hello || upnp != nil else { return nil }
+        return DiscoveredDevice(kind: .lgWebOS, name: upnp?.friendlyName, ip: ip, mac: nil)
+    }
+
+    private static func lgSaysHello(_ address: String) async -> Bool {
+        guard let url = URL(string: address) else { return false }
         var request = URLRequest(url: url)
-        request.timeoutInterval = 0.8
-        guard let (data, _) = try? await localNetworkSession.data(for: request) else { return nil }
-        let body = String(decoding: data.prefix(64), as: UTF8.self).lowercased()
-        guard body.contains("hello world") else { return nil }
-        return DiscoveredDevice(kind: .lgWebOS, name: nil, ip: ip, mac: nil)
+        request.timeoutInterval = 1.2
+        guard let (data, _) = try? await localNetworkSession.data(for: request) else { return false }
+        return String(decoding: data.prefix(64), as: UTF8.self).lowercased().contains("hello world")
     }
 
     private static func triggerLocalNetworkPermission() async {
@@ -264,5 +280,87 @@ private final class AirPlayBrowser: NSObject, NetServiceBrowserDelegate, NetServ
         browser?.stop()
         services.forEach { $0.stop() }
         continuation?.resume(returning: result)
+    }
+}
+
+
+// MARK: - SSDP LG (unicast, pas besoin de l'entitlement multicast)
+
+/// Envoie un M-SEARCH « webos-second-screen » directement à la TV (port 1900) :
+/// toutes les webOS y répondent, y compris les modèles 2014-2017 sans AirPlay.
+enum LGSSDPProbe {
+    struct Info: Sendable {
+        var friendlyName: String?
+    }
+
+    static func query(ip: String, timeout: TimeInterval = 1.5) async -> Info? {
+        guard let reply = await search(ip: ip, timeout: timeout) else { return nil }
+        let lower = reply.lowercased()
+        guard lower.contains("webos") || lower.contains("lge-com") else { return nil }
+        var info = Info()
+        if let location = header("location", in: reply), let url = URL(string: location),
+           let host = url.host, LocalNetworkTrustDelegate.isPrivateHost(host) {
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 1.5
+            if let (data, _) = try? await localNetworkSession.data(for: request) {
+                info.friendlyName = tag("friendlyName", in: String(decoding: data, as: UTF8.self))
+            }
+        }
+        return info
+    }
+
+    private static func search(ip: String, timeout: TimeInterval) async -> String? {
+        let message = [
+            "M-SEARCH * HTTP/1.1",
+            "HOST: 239.255.255.250:1900",
+            "MAN: \"ssdp:discover\"",
+            "MX: 1",
+            "ST: urn:lge-com:service:webos-second-screen:1",
+            "", "",
+        ].joined(separator: "\r\n")
+        let connection = NWConnection(host: NWEndpoint.Host(ip), port: 1900, using: .udp)
+        return await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
+            let done = OSAllocatedUnfairLock(initialState: false)
+            let finish: @Sendable (String?) -> Void = { value in
+                let first = done.withLock { state -> Bool in
+                    defer { state = true }
+                    return !state
+                }
+                guard first else { return }
+                connection.cancel()
+                continuation.resume(returning: value)
+            }
+            connection.stateUpdateHandler = { state in
+                switch state {
+                case .ready:
+                    connection.send(content: Data(message.utf8), completion: .contentProcessed { error in
+                        if error != nil { finish(nil) }
+                    })
+                    connection.receiveMessage { data, _, _, _ in
+                        finish(data.map { String(decoding: $0, as: UTF8.self) })
+                    }
+                case .failed, .cancelled: finish(nil)
+                default: break
+                }
+            }
+            connection.start(queue: .global())
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { finish(nil) }
+        }
+    }
+
+    private static func header(_ name: String, in reply: String) -> String? {
+        for line in reply.components(separatedBy: "\r\n") {
+            let parts = line.split(separator: ":", maxSplits: 1)
+            if parts.count == 2, parts[0].trimmingCharacters(in: .whitespaces).lowercased() == name {
+                return parts[1].trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return nil
+    }
+
+    private static func tag(_ name: String, in xml: String) -> String? {
+        guard let open = xml.range(of: "<\(name)>"), let close = xml.range(of: "</\(name)>", range: open.upperBound..<xml.endIndex) else { return nil }
+        let value = xml[open.upperBound..<close.lowerBound].trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
     }
 }

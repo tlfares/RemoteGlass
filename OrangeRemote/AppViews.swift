@@ -197,6 +197,7 @@ struct RemotePage: View {
 
     private func pane(_ tab: RemoteTabConfig, shownElsewhere: UUID?, matchedRows: Int?) -> some View {
         RemoteTabView(hub: hub, tab: tab, isSelected: isSelected, drawsBackground: false, deviceShownElsewhere: shownElsewhere, matchedButtonRows: matchedRows, openSettings: openSettings, addDevice: addDevice)
+            .tint(hub.background(for: tab).accent)
             .id(tab.id)
     }
 }
@@ -740,6 +741,8 @@ struct BackgroundView: View {
                         .frame(width: proxy.size.width, height: proxy.size.height)
                         .clipped()
                 }
+            } else if style.isMesh, style.colorHexes.count >= 3 {
+                MeshBackground(colors: style.colors, weight: style.weight, spread: style.spread)
             } else if style.colorHexes.count > 2 {
                 let colors = style.colors
                 ZStack {
@@ -780,6 +783,39 @@ struct BackgroundView: View {
         }
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.35), value: style)
+    }
+}
+
+/// Dégradé fondu à 3 ou 4 teintes : sombre en haut, la teinte la plus claire au coin inférieur droit.
+struct MeshBackground: View {
+    var colors: [Color]
+    var weight: Double
+    var spread: Double
+
+    var body: some View {
+        let c0 = colors[0]
+        let c1 = colors[1]
+        let c2 = colors[2]
+        let c3 = colors.count > 3 ? colors[3] : c2
+        // « Hauteur » déplace la rangée du milieu, « Progression » la courbe.
+        let mid = Float(0.3 + weight * 0.4)
+        let bend = Float(0.05 + spread * 0.2)
+        MeshGradient(
+            width: 3,
+            height: 3,
+            points: [
+                [0, 0], [0.5, 0], [1, 0],
+                [0, mid], [0.5 - bend, mid + bend * 0.6], [1, mid - bend],
+                [0, 1], [0.5, 1], [1, 1],
+            ],
+            colors: [
+                c0, c0, c0,
+                c0, c1.mix(with: c0, by: 0.35), c1,
+                c1, c2, c3,
+            ],
+            smoothsColors: true
+        )
+        .overlay(Color.black.opacity(0.06))
     }
 }
 
